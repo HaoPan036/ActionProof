@@ -86,4 +86,37 @@ describe("OpenAI helper validation", () => {
     expect(toolCall.contains_prompt_injection).toBe(false);
     expect("decision" in toolCall).toBe(false);
   });
+
+  it("converts blank optional string fields to null", () => {
+    const toolCall = parseExtractedToolCallOutput(
+      {
+        action: "refund_order",
+        amount: 30,
+        refund_count: null,
+        customer_data_type: "",
+        customer_tier: " ",
+        reason_category: "",
+        containsPromptInjection: false,
+        action_count: 1,
+        customerId: "",
+        orderId: "ord_syn_1004",
+        rawUserRequest: "Refund order ord_syn_1004 for $30.",
+        riskLevel: "MEDIUM",
+        riskSignals: [],
+        evidenceProvided: false,
+        hasDeliveryIssue: false,
+        refundCount30d: null,
+        refundAmount30d: null,
+        accountAgeDays: null,
+        sameAddressRefundCount30d: null,
+      },
+      "Refund order ord_syn_1004 for $30.",
+    );
+
+    expect(toolCall.customer_data_type).toBeNull();
+    expect(toolCall.customer_tier).toBeNull();
+    expect(toolCall.reason_category).toBeNull();
+    expect(toolCall.customerId).toBeNull();
+    expect(toolCall.orderId).toBe("ord_syn_1004");
+  });
 });

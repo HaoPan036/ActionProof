@@ -37,6 +37,15 @@ function createToolCallId(userRequest: string): string {
   return `tool_extracted_${hash}`;
 }
 
+function blankToNull(value: string | null): string | null {
+  if (value === null) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
 export function parseExtractedToolCallOutput(
   output: unknown,
   userRequest: string,
@@ -48,13 +57,13 @@ export function parseExtractedToolCallOutput(
     action: parsed.action,
     amount: parsed.amount,
     refund_count: parsed.refund_count,
-    customer_data_type: parsed.customer_data_type,
-    customer_tier: parsed.customer_tier,
-    reason_category: parsed.reason_category,
+    customer_data_type: blankToNull(parsed.customer_data_type),
+    customer_tier: blankToNull(parsed.customer_tier),
+    reason_category: blankToNull(parsed.reason_category),
     contains_prompt_injection: parsed.containsPromptInjection,
     action_count: parsed.action_count,
-    customerId: parsed.customerId,
-    orderId: parsed.orderId,
+    customerId: blankToNull(parsed.customerId),
+    orderId: blankToNull(parsed.orderId),
     rawUserRequest: parsed.rawUserRequest || userRequest,
     userRequest,
     riskLevel: parsed.riskLevel,
