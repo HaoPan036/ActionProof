@@ -10,7 +10,7 @@ const PROMPT_INJECTION_PATTERNS = [
   /secretly|silently/i,
 ];
 
-export function detectPromptInjection(text: string | undefined): boolean {
+export function detectPromptInjection(text: string | null | undefined): boolean {
   if (!text) {
     return false;
   }
@@ -19,7 +19,11 @@ export function detectPromptInjection(text: string | undefined): boolean {
 }
 
 export function enrichToolCallSignals(toolCall: ToolCall): ToolCall {
-  const textFields = [toolCall.userRequest, toolCall.reason_category];
+  const textFields = [
+    toolCall.userRequest,
+    toolCall.rawUserRequest,
+    toolCall.reason_category,
+  ];
   const detected = textFields.some(detectPromptInjection);
 
   return {
