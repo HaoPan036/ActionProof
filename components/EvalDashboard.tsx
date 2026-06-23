@@ -43,6 +43,11 @@ export function EvalDashboard() {
   const report = runEval();
   const headlineMetrics = [
     {
+      value: String(report.totalCases),
+      label: "Deterministic cases",
+      tone: "border-cyan-200 bg-cyan-50 text-cyan-900",
+    },
+    {
       value: formatPercent(report.metrics.policyDecisionAccuracy),
       label: "Policy decision accuracy",
       tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
@@ -63,9 +68,9 @@ export function EvalDashboard() {
       tone: "border-slate-200 bg-slate-50 text-slate-900",
     },
     {
-      value: String(report.totalCases),
-      label: "Deterministic cases",
-      tone: "border-cyan-200 bg-cyan-50 text-cyan-900",
+      value: formatPercent(report.metrics.falseDenyRate),
+      label: "False deny rate",
+      tone: "border-slate-200 bg-slate-50 text-slate-900",
     },
   ];
 
@@ -79,7 +84,7 @@ export function EvalDashboard() {
           {report.totalCases} deterministic cases
         </span>
       </div>
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6">
         {headlineMetrics.map((metric) => (
           <div
             key={metric.label}

@@ -13,6 +13,36 @@ type RequestSimulatorProps = {
   error: string | null;
 };
 
+const presetGroups = [
+  {
+    title: "Safe",
+    ids: ["allow-low-risk-refund"],
+    tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+  },
+  {
+    title: "Needs Review",
+    ids: ["approval-suspicious-small-refund", "approval-refund-120"],
+    tone: "border-amber-200 bg-amber-50 text-amber-950",
+  },
+  {
+    title: "Blocked",
+    ids: [
+      "deny-repeated-refund-abuse",
+      "deny-attack-refund",
+      "deny-high-value-refund",
+      "deny-data-export",
+      "deny-bulk-refund",
+      "deny-modify-policy",
+    ],
+    tone: "border-rose-200 bg-rose-50 text-rose-950",
+  },
+];
+
+const recordingTargetIds = new Set([
+  "deny-repeated-refund-abuse",
+  "deny-attack-refund",
+]);
+
 export function RequestSimulator({
   presets,
   selectedPresetId,
@@ -43,24 +73,52 @@ export function RequestSimulator({
           <h3 className="mb-2 text-xs font-semibold uppercase text-slate-500">
             Mode A: Preset Tool Calls
           </h3>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-1">
-            {presets.map((preset) => {
-              const isSelected = preset.id === selectedPresetId;
+          <div className="space-y-3">
+            {presetGroups.map((group) => {
+              const groupPresets = group.ids
+                .map((id) => presets.find((preset) => preset.id === id))
+                .filter((preset): preset is ToolPreset => Boolean(preset));
 
               return (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => onRunPreset(preset)}
-                  className={[
-                    "rounded-md border px-3 py-2 text-left text-sm font-medium transition",
-                    isSelected
-                      ? "border-cyan-600 bg-cyan-50 text-cyan-900"
-                      : "border-slate-200 bg-white text-slate-700 hover:border-cyan-300 hover:bg-slate-50",
-                  ].join(" ")}
-                >
-                  {preset.label}
-                </button>
+                <div key={group.title} className="rounded-md border border-slate-200 p-2">
+                  <div
+                    className={[
+                      "mb-2 rounded-md border px-2 py-1 text-xs font-black uppercase",
+                      group.tone,
+                    ].join(" ")}
+                  >
+                    {group.title}
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                    {groupPresets.map((preset) => {
+                      const isSelected = preset.id === selectedPresetId;
+                      const isRecordingTarget = recordingTargetIds.has(preset.id);
+
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => onRunPreset(preset)}
+                          className={[
+                            "rounded-md border px-3 py-2 text-left text-sm font-bold transition",
+                            isSelected
+                              ? "border-cyan-700 bg-cyan-50 text-cyan-950 ring-2 ring-cyan-100"
+                              : isRecordingTarget
+                                ? "border-rose-300 bg-rose-50 text-rose-950 shadow-sm hover:border-rose-500"
+                                : "border-slate-200 bg-white text-slate-700 hover:border-cyan-300 hover:bg-slate-50",
+                          ].join(" ")}
+                        >
+                          <span>{preset.label}</span>
+                          {isRecordingTarget ? (
+                            <span className="mt-1 block text-xs font-semibold uppercase text-rose-700">
+                              Recording target
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -97,7 +155,7 @@ export function RequestSimulator({
           <div className="mb-1 text-xs font-medium text-slate-500">
             Selected preset ToolCall
           </div>
-          <pre className="max-h-56 overflow-auto rounded-md bg-slate-100 p-3 text-xs leading-5 text-slate-800">
+          <pre className="max-h-36 overflow-auto rounded-md bg-slate-100 p-3 text-xs leading-5 text-slate-800">
             {JSON.stringify(selectedPreset.toolCall, null, 2)}
           </pre>
         </div>
@@ -105,7 +163,7 @@ export function RequestSimulator({
           <div className="mb-1 text-xs font-medium text-slate-500">
             Extracted ToolCall
           </div>
-          <pre className="max-h-56 overflow-auto rounded-md bg-slate-950 p-3 text-xs leading-5 text-slate-100">
+          <pre className="max-h-36 overflow-auto rounded-md bg-slate-950 p-3 text-xs leading-5 text-slate-100">
             {extractedToolCall
               ? JSON.stringify(extractedToolCall, null, 2)
               : "No extracted tool call yet."}

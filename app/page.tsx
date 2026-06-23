@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ApprovalPanel } from "@/components/ApprovalPanel";
 import { ArchitectureNotes } from "@/components/ArchitectureNotes";
 import { AuditTimeline } from "@/components/AuditTimeline";
+import { DemoStage } from "@/components/DemoStage";
 import { DecisionCard } from "@/components/DecisionCard";
 import { EvalDashboard } from "@/components/EvalDashboard";
 import { PolicyViewer } from "@/components/PolicyViewer";
@@ -45,6 +46,9 @@ export default function Home() {
   const [sopText, setSopText] = useState(defaultSop);
   const [policy, setPolicy] = useState<Policy>(defaultPolicy);
   const [selectedPresetId, setSelectedPresetId] = useState(initialPreset.id);
+  const [currentScenarioLabel, setCurrentScenarioLabel] = useState(
+    initialPreset.label,
+  );
   const [decision, setDecision] = useState<DecisionResult>(initialDecision);
   const [currentToolCall, setCurrentToolCall] =
     useState<ToolCall>(initialToolCall);
@@ -100,6 +104,7 @@ export default function Home() {
   function runPreset(preset: ToolPreset) {
     setExtractError(null);
     setSelectedPresetId(preset.id);
+    setCurrentScenarioLabel(preset.label);
     recordDecision(preset.toolCall, preset.id);
   }
 
@@ -158,6 +163,7 @@ export default function Home() {
 
       const parsedToolCall = ToolCallSchema.parse(payload.toolCall);
       setExtractedToolCall(parsedToolCall);
+      setCurrentScenarioLabel("Extracted natural language request");
       recordDecision(parsedToolCall, "extracted-action");
     } catch (error) {
       setExtractError(
@@ -198,16 +204,16 @@ export default function Home() {
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="mb-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-100 bg-slate-950 px-5 py-6 text-white sm:px-7 sm:py-8">
+        <header className="mb-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="grid grid-cols-1 gap-5 border-b border-slate-100 bg-slate-950 px-5 py-6 text-white sm:px-7 lg:grid-cols-[1fr_18rem] lg:items-end">
             <div>
               <p className="text-sm font-semibold uppercase text-cyan-300">
                 Runtime Permission Gateway
               </p>
-              <h1 className="mt-2 text-4xl font-bold sm:text-5xl">
+              <h1 className="mt-2 text-5xl font-black tracking-normal sm:text-6xl">
                 PolicyGate
               </h1>
-              <p className="mt-4 max-w-4xl text-2xl font-semibold leading-tight text-white sm:text-3xl">
+              <p className="mt-4 max-w-4xl text-2xl font-bold leading-tight text-white sm:text-3xl">
                 Prompts are suggestions a model can ignore. PolicyGate is
                 enforcement a model cannot.
               </p>
@@ -216,12 +222,22 @@ export default function Home() {
                 calls.
               </p>
             </div>
+            <div className="rounded-md border border-white/10 bg-white/10 p-4">
+              <div className="text-xs font-semibold uppercase text-cyan-200">
+                Final authority
+              </div>
+              <div className="mt-2 text-3xl font-black">TypeScript</div>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                The model may suggest a candidate action. PolicyGate enforces
+                the final decision.
+              </p>
+            </div>
           </div>
           <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:p-5">
             {valueCards.map((card) => (
               <div
                 key={card.title}
-                className="rounded-md border border-slate-200 bg-slate-50 p-4"
+                className="rounded-md border border-slate-200 bg-slate-50 p-4 shadow-sm"
               >
                 <div className="text-sm font-bold text-slate-950">
                   {card.title}
@@ -238,21 +254,16 @@ export default function Home() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <SopEditor
-            value={sopText}
-            onChange={setSopText}
-            onCompile={compileSop}
-            onResetPolicy={resetPolicy}
-            onLineSelect={handleSourceLineClick}
-            highlightedLines={highlightedSopLines}
-            isCompiling={isCompiling}
-            error={compileError}
-          />
-          <PolicyViewer policy={policy} />
-        </div>
+        <DemoStage
+          scenarioLabel={currentScenarioLabel}
+          decision={decision}
+          toolCall={currentToolCall}
+          executed={executed}
+          approvalStatus={approvalStatus}
+          onSourceLineClick={handleSourceLineClick}
+        />
 
-        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <RequestSimulator
             presets={toolPresets}
             selectedPresetId={selectedPresetId}
@@ -280,6 +291,20 @@ export default function Home() {
               onReject={() => appendApprovalAuditEvent("REJECTED")}
             />
           </div>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <SopEditor
+            value={sopText}
+            onChange={setSopText}
+            onCompile={compileSop}
+            onResetPolicy={resetPolicy}
+            onLineSelect={handleSourceLineClick}
+            highlightedLines={highlightedSopLines}
+            isCompiling={isCompiling}
+            error={compileError}
+          />
+          <PolicyViewer policy={policy} />
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[0.95fr_1.05fr]">

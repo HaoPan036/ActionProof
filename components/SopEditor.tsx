@@ -32,9 +32,9 @@ export function SopEditor({
       <textarea
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="min-h-48 w-full resize-y rounded-md border border-slate-200 bg-slate-50 p-3 font-mono text-sm leading-6 text-slate-800 outline-none transition focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100"
+        className="min-h-36 w-full resize-y rounded-md border border-slate-200 bg-slate-50 p-3 font-mono text-sm leading-6 text-slate-800 outline-none transition focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100"
       />
-      <div className="mt-3 max-h-80 overflow-auto rounded-md border border-slate-200 bg-white">
+      <div className="mt-3 max-h-72 overflow-auto rounded-md border border-slate-200 bg-white">
         {lines.map((line, index) => {
           const lineNumber = index + 1;
           const isHighlighted = highlightedLines.includes(lineNumber);
@@ -45,10 +45,10 @@ export function SopEditor({
               type="button"
               onClick={() => onLineSelect(lineNumber)}
               className={[
-                "grid w-full grid-cols-[2.75rem_1fr] gap-3 border-b border-slate-100 px-3 py-2 text-left text-sm last:border-b-0",
+                "grid w-full grid-cols-[2.75rem_1fr] gap-3 border-b border-l-4 border-b-slate-100 px-3 py-2 text-left text-sm last:border-b-0",
                 isHighlighted
-                  ? "bg-cyan-50 text-cyan-950 ring-1 ring-inset ring-cyan-200"
-                  : "bg-white text-slate-700 hover:bg-slate-50",
+                  ? "border-l-amber-400 bg-amber-50 text-amber-950 ring-2 ring-inset ring-amber-200"
+                  : "border-l-transparent bg-white text-slate-700 hover:bg-slate-50",
               ].join(" ")}
             >
               <span className="font-mono text-xs text-slate-400">

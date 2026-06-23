@@ -44,7 +44,7 @@ export function PolicyViewer({ policy }: PolicyViewerProps) {
       <div className="mb-1 text-xs font-medium text-slate-500">
         Raw Policy JSON
       </div>
-      <pre className="max-h-80 overflow-auto rounded-md bg-slate-950 p-4 text-xs leading-5 text-slate-100">
+      <pre className="max-h-64 overflow-auto rounded-md bg-slate-950 p-4 text-xs leading-5 text-slate-100">
         {JSON.stringify(policy, null, 2)}
       </pre>
     </section>
