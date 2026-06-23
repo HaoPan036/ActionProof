@@ -18,7 +18,7 @@ function formatPercent(value: number): string {
   return `${Math.round(value * 100)}%`;
 }
 
-function MetricGrid({
+function MetricRows({
   metrics,
   labels,
 }: {
@@ -26,12 +26,43 @@ function MetricGrid({
   labels: Record<string, string>;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="space-y-2">
       {Object.entries(labels).map(([key, label]) => (
-        <div key={key} className="rounded-md border border-slate-200 p-3">
-          <div className="text-xs font-medium text-slate-500">{label}</div>
-          <div className="mt-2 text-2xl font-bold text-slate-950">
+        <div
+          key={key}
+          className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2"
+        >
+          <div className="min-w-0 text-sm font-medium leading-5 text-slate-600">
+            {label}
+          </div>
+          <div className="whitespace-nowrap text-right text-lg font-black leading-none text-slate-950 tabular-nums">
             {formatPercent(metrics[key] ?? 0)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LlmMetricRows() {
+  const rows = [
+    "Action extraction accuracy",
+    "Amount extraction accuracy",
+    "Risk extraction accuracy",
+  ];
+
+  return (
+    <div className="mt-3 space-y-2">
+      {rows.map((label) => (
+        <div
+          key={label}
+          className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2"
+        >
+          <div className="min-w-0 text-sm font-medium leading-5 text-slate-600">
+            {label}
+          </div>
+          <div className="whitespace-nowrap text-right text-sm font-bold leading-none text-slate-500 tabular-nums">
+            Not run
           </div>
         </div>
       ))}
@@ -84,7 +115,7 @@ export function EvalDashboard() {
           {report.totalCases} deterministic cases
         </span>
       </div>
-      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-6">
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">
         {headlineMetrics.map((metric) => (
           <div
             key={metric.label}
@@ -100,7 +131,7 @@ export function EvalDashboard() {
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 2xl:grid-cols-3">
         <div className="rounded-md border border-slate-200 p-3">
           <h3 className="text-sm font-semibold text-slate-950">
             LLM Extraction Layer
@@ -109,23 +140,19 @@ export function EvalDashboard() {
             LLM extraction is demonstrated live through the request simulator.
             Deterministic enforcement is evaluated below.
           </p>
-          <div className="mt-3 space-y-2 text-sm text-slate-500">
-            <div>actionExtractionAccuracy: Not run</div>
-            <div>amountExtractionAccuracy: Not run</div>
-            <div>riskExtractionAccuracy: Not run</div>
-          </div>
+          <LlmMetricRows />
         </div>
         <div className="rounded-md border border-slate-200 p-3">
           <h3 className="mb-3 text-sm font-semibold text-slate-950">
             Deterministic Engine Layer
           </h3>
-          <MetricGrid metrics={report.metrics} labels={engineMetricLabels} />
+          <MetricRows metrics={report.metrics} labels={engineMetricLabels} />
         </div>
         <div className="rounded-md border border-slate-200 p-3">
           <h3 className="mb-3 text-sm font-semibold text-slate-950">
             Safety and Abuse Guard Layer
           </h3>
-          <MetricGrid metrics={report.metrics} labels={safetyMetricLabels} />
+          <MetricRows metrics={report.metrics} labels={safetyMetricLabels} />
         </div>
       </div>
     </section>
