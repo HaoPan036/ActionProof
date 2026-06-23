@@ -4,9 +4,9 @@ import { useState } from "react";
 import { ApprovalPanel } from "@/components/ApprovalPanel";
 import { ArchitectureNotes } from "@/components/ArchitectureNotes";
 import { AuditTimeline } from "@/components/AuditTimeline";
-import { DemoStage } from "@/components/DemoStage";
 import { DecisionCard } from "@/components/DecisionCard";
 import { EvalDashboard } from "@/components/EvalDashboard";
+import { PresentationMode } from "@/components/PresentationMode";
 import { PolicyViewer } from "@/components/PolicyViewer";
 import { RequestSimulator } from "@/components/RequestSimulator";
 import { SopEditor } from "@/components/SopEditor";
@@ -254,16 +254,42 @@ export default function Home() {
           </div>
         </header>
 
-        <DemoStage
+        <PresentationMode
+          presets={toolPresets}
+          selectedPresetId={selectedPresetId}
           scenarioLabel={currentScenarioLabel}
           decision={decision}
           toolCall={currentToolCall}
           executed={executed}
           approvalStatus={approvalStatus}
+          sopText={sopText}
+          onRunPreset={runPreset}
           onSourceLineClick={handleSourceLineClick}
         />
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+        <div className="mb-4 mt-6 flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200" />
+          <h2 className="text-sm font-black uppercase text-slate-500">
+            Technical Details
+          </h2>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <SopEditor
+            value={sopText}
+            onChange={setSopText}
+            onCompile={compileSop}
+            onResetPolicy={resetPolicy}
+            onLineSelect={handleSourceLineClick}
+            highlightedLines={highlightedSopLines}
+            isCompiling={isCompiling}
+            error={compileError}
+          />
+          <PolicyViewer policy={policy} />
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
           <RequestSimulator
             presets={toolPresets}
             selectedPresetId={selectedPresetId}
@@ -291,20 +317,6 @@ export default function Home() {
               onReject={() => appendApprovalAuditEvent("REJECTED")}
             />
           </div>
-        </div>
-
-        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <SopEditor
-            value={sopText}
-            onChange={setSopText}
-            onCompile={compileSop}
-            onResetPolicy={resetPolicy}
-            onLineSelect={handleSourceLineClick}
-            highlightedLines={highlightedSopLines}
-            isCompiling={isCompiling}
-            error={compileError}
-          />
-          <PolicyViewer policy={policy} />
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[0.95fr_1.05fr]">

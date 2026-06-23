@@ -106,7 +106,8 @@ export function EvalDashboard() {
             LLM Extraction Layer
           </h3>
           <p className="mt-2 rounded-md bg-slate-50 p-3 text-sm text-slate-600">
-            Not run. Deterministic engine eval is still available.
+            LLM extraction is demonstrated live through the request simulator.
+            Deterministic enforcement is evaluated below.
           </p>
           <div className="mt-3 space-y-2 text-sm text-slate-500">
             <div>actionExtractionAccuracy: Not run</div>
