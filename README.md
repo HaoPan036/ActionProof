@@ -2,7 +2,7 @@
 
 PolicyGate is a runtime permission gateway for AI agents. It compiles written SOPs into deterministic policies and enforces those policies before any tool execution.
 
-Phase 1 builds the deterministic foundation. Phase 2 adds OpenAI structured extraction for SOP compilation and candidate action extraction. The app does not expose MCP tools and does not connect to real company systems.
+Phase 1 builds the deterministic foundation. Phase 2 adds OpenAI structured extraction for SOP compilation and candidate action extraction. Phase 3 adds an isolated stdio MCP server with gated tools for a synthetic commerce demo. The app does not connect to real company systems.
 
 ## Why prompt guardrails are insufficient
 
@@ -67,6 +67,37 @@ Use preset buttons to run the deterministic demo without OpenAI. With `OPENAI_AP
 
 Final decisions still come only from `decide(toolCall, policy)`.
 
+## MCP demo
+
+PolicyGate exposes gated MCP tools for a synthetic commerce demo. It is intentionally scoped to the four tools listed below.
+
+Run the stdio MCP server:
+
+```bash
+npm run mcp:dev
+```
+
+Launch MCP Inspector:
+
+```bash
+npm run mcp:inspect
+```
+
+Manual Inspector command:
+
+```bash
+npx @modelcontextprotocol/inspector tsx mcp/server.ts
+```
+
+The MCP server exposes exactly:
+
+- `refund_order`
+- `export_customer_data`
+- `bulk_refund`
+- `modify_policy`
+
+Each tool normalizes arguments into `ToolCall`, calls `decide(toolCall, defaultPolicy)`, writes an audit event, and executes the synthetic tool only when the deterministic decision is `ALLOW`.
+
 ## Run tests
 
 ```bash
@@ -91,4 +122,4 @@ npm run build
 
 This repository uses synthetic demo data only. Do not add real company data, internal business rules, internal table names, private customer information, credentials, API keys, or secrets.
 
-There are no credentials in this repo, and Phase 1 does not require any external service keys.
+There are no credentials in this repo. The deterministic demo and MCP demo do not require external service keys.

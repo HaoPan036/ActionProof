@@ -97,3 +97,68 @@ export const toolPresets: ToolPreset[] = [
     },
   },
 ];
+
+export type SimulatedRefundOrderArgs = {
+  orderId: string;
+  customerId: string;
+  amount: number;
+  reason: string;
+};
+
+export type SimulatedExportCustomerDataArgs = {
+  customerDataType: string;
+  scope: string;
+};
+
+export type SimulatedBulkRefundArgs = {
+  orderIds: string[];
+  amountPerOrder: number;
+  reason: string;
+};
+
+export type SimulatedModifyPolicyArgs = {
+  requestedChange: string;
+};
+
+export function simulateRefundOrder(args: SimulatedRefundOrderArgs) {
+  return {
+    operation: "refund_order",
+    refundId: `refund_syn_${args.orderId}`,
+    orderId: args.orderId,
+    customerId: args.customerId,
+    amount: args.amount,
+    reason: args.reason,
+    provider: "synthetic-commerce",
+  };
+}
+
+export function simulateExportCustomerData(args: SimulatedExportCustomerDataArgs) {
+  return {
+    operation: "export_customer_data",
+    exportId: "export_syn_placeholder",
+    customerDataType: args.customerDataType,
+    scope: args.scope,
+    rows: [],
+    provider: "synthetic-commerce",
+  };
+}
+
+export function simulateBulkRefund(args: SimulatedBulkRefundArgs) {
+  return {
+    operation: "bulk_refund",
+    batchId: "bulk_refund_syn_placeholder",
+    orderIds: args.orderIds,
+    amountPerOrder: args.amountPerOrder,
+    reason: args.reason,
+    provider: "synthetic-commerce",
+  };
+}
+
+export function simulateModifyPolicy(args: SimulatedModifyPolicyArgs) {
+  return {
+    operation: "modify_policy",
+    changeRequestId: "policy_change_syn_placeholder",
+    requestedChange: args.requestedChange,
+    provider: "synthetic-commerce",
+  };
+}
