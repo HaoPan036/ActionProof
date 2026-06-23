@@ -26,6 +26,21 @@ const initialDecision = decide(initialPreset.toolCall, defaultPolicy);
 const initialToolCall = ToolCallSchema.parse(initialPreset.toolCall);
 type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | null;
 
+const valueCards = [
+  {
+    title: "Runtime Enforcement",
+    body: "Every tool call is checked before execution.",
+  },
+  {
+    title: "Refund Abuse Guard",
+    body: "Small refunds are auto approved only when they are low value and low risk.",
+  },
+  {
+    title: "Audit Proof",
+    body: "Every decision links back to the SOP line that caused it.",
+  },
+];
+
 export default function Home() {
   const [sopText, setSopText] = useState(defaultSop);
   const [policy, setPolicy] = useState<Policy>(defaultPolicy);
@@ -183,31 +198,43 @@ export default function Home() {
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <header className="mb-6 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+          <div className="border-b border-slate-100 bg-slate-950 px-5 py-6 text-white sm:px-7 sm:py-8">
             <div>
-              <p className="text-sm font-semibold uppercase text-cyan-700">
-                PolicyGate Phase 4
+              <p className="text-sm font-semibold uppercase text-cyan-300">
+                Runtime Permission Gateway
               </p>
-              <h1 className="mt-2 max-w-3xl text-3xl font-bold text-slate-950 sm:text-4xl">
+              <h1 className="mt-2 text-4xl font-bold sm:text-5xl">
+                PolicyGate
+              </h1>
+              <p className="mt-4 max-w-4xl text-2xl font-semibold leading-tight text-white sm:text-3xl">
                 Prompts are suggestions a model can ignore. PolicyGate is
                 enforcement a model cannot.
-              </h1>
-            </div>
-            <div className="max-w-xl space-y-2 text-sm leading-6 text-slate-600">
-              <p>
-                PolicyGate compiles written SOPs into deterministic runtime
-                policies and gates AI agent tool calls before execution.
               </p>
-              <p>
-                AI extracts candidate actions and risk signals. PolicyGate
-                enforces the final decision with deterministic code.
-              </p>
-              <p className="font-semibold text-slate-950">
-                Small refunds are only auto approved when they are low value and
-                low risk.
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
+                A deterministic runtime permission gateway for AI agent tool
+                calls.
               </p>
             </div>
+          </div>
+          <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:p-5">
+            {valueCards.map((card) => (
+              <div
+                key={card.title}
+                className="rounded-md border border-slate-200 bg-slate-50 p-4"
+              >
+                <div className="text-sm font-bold text-slate-950">
+                  {card.title}
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {card.body}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-slate-100 px-5 py-3 text-sm text-slate-600">
+            AI extracts candidate actions and risk signals. PolicyGate enforces
+            the final decision with deterministic code.
           </div>
         </header>
 

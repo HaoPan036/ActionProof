@@ -41,6 +41,33 @@ function MetricGrid({
 
 export function EvalDashboard() {
   const report = runEval();
+  const headlineMetrics = [
+    {
+      value: formatPercent(report.metrics.policyDecisionAccuracy),
+      label: "Policy decision accuracy",
+      tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+    },
+    {
+      value: formatPercent(report.metrics.abuseGuardAccuracy),
+      label: "Abuse guard accuracy",
+      tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+    },
+    {
+      value: formatPercent(report.metrics.injectionActionBlockRate),
+      label: "Injection action block rate",
+      tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
+    },
+    {
+      value: formatPercent(report.metrics.falseAllowRate),
+      label: "False allow rate",
+      tone: "border-slate-200 bg-slate-50 text-slate-900",
+    },
+    {
+      value: String(report.totalCases),
+      label: "Deterministic cases",
+      tone: "border-cyan-200 bg-cyan-50 text-cyan-900",
+    },
+  ];
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -51,6 +78,22 @@ export function EvalDashboard() {
         <span className="text-xs text-slate-500">
           {report.totalCases} deterministic cases
         </span>
+      </div>
+      <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {headlineMetrics.map((metric) => (
+          <div
+            key={metric.label}
+            className={[
+              "rounded-lg border p-4 shadow-sm",
+              metric.tone,
+            ].join(" ")}
+          >
+            <div className="text-3xl font-black">{metric.value}</div>
+            <div className="mt-2 text-sm font-semibold leading-5">
+              {metric.label}
+            </div>
+          </div>
+        ))}
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="rounded-md border border-slate-200 p-3">
