@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseCompiledPolicyOutput } from "@/lib/openai/compilePolicy";
 import { parseExtractedToolCallOutput } from "@/lib/openai/extractToolCall";
+import { decide } from "@/lib/policy-engine/decide";
 
 describe("OpenAI helper validation", () => {
   it("validates and safety-normalizes compiled policies without live OpenAI calls", () => {
@@ -49,6 +50,76 @@ describe("OpenAI helper validation", () => {
         ],
       }),
     ).toThrow("missing source SOP lines");
+  });
+
+  it("normalizes unsafe compiled refund priority order before decisions", () => {
+    const policy = parseCompiledPolicyOutput({
+      id: "generated_policy",
+      name: "Generated Policy",
+      version: "1.0.0",
+      defaultDecision: "DENY",
+      rules: [
+        {
+          id: "allow_small_low_risk_refund",
+          priority: 1,
+          action: "refund_order",
+          decision: "ALLOW",
+          all: [
+            { field: "amount", operator: "lte", value: 50 },
+            { field: "risk_level", operator: "eq", value: "LOW" },
+          ],
+          any: [],
+          reason: "Low value and low risk refunds may be approved.",
+          sourceSopLines: [1],
+        },
+        {
+          id: "deny_repeated_refund_abuse",
+          priority: 2,
+          action: "refund_order",
+          decision: "DENY",
+          all: [{ field: "refund_count_30d", operator: "gte", value: 5 }],
+          any: [],
+          reason: "Customer has 5 or more refund requests in 30 days.",
+          sourceSopLines: [5],
+        },
+      ],
+    });
+
+    const abuseRule = policy.rules.find(
+      (rule) => rule.id === "deny_repeated_refund_abuse",
+    );
+    const allowRule = policy.rules.find(
+      (rule) => rule.id === "allow_small_low_risk_refund",
+    );
+
+    expect(abuseRule?.priority).toBeLessThan(allowRule?.priority ?? Infinity);
+
+    const decision = decide(
+      {
+        id: "tool_repeated_abuse_after_compile",
+        action: "refund_order",
+        amount: 20,
+        refund_count: 8,
+        customer_tier: "standard",
+        reason_category: "delivery_issue",
+        contains_prompt_injection: false,
+        action_count: 1,
+        rawUserRequest:
+          "Refund order ord_syn_2001 for $20. Customer has 8 refunds in 30 days.",
+        riskLevel: "LOW",
+        riskSignals: ["8 refunds in 30 days"],
+        evidenceProvided: true,
+        hasDeliveryIssue: true,
+        refundCount30d: 8,
+        refundAmount30d: 120,
+        accountAgeDays: 60,
+        sameAddressRefundCount30d: 1,
+      },
+      policy,
+    );
+
+    expect(decision.decision).toBe("DENY");
+    expect(decision.matchedRuleId).toBe("deny_repeated_refund_abuse");
   });
 
   it("normalizes extracted candidate actions without returning a decision", () => {

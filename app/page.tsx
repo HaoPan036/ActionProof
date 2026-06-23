@@ -275,6 +275,7 @@ export default function Home() {
             <ApprovalPanel
               visible={decision.decision === "APPROVAL"}
               approvalStatus={approvalStatus}
+              toolCall={currentToolCall}
               onApprove={() => appendApprovalAuditEvent("APPROVED")}
               onReject={() => appendApprovalAuditEvent("REJECTED")}
             />

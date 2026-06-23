@@ -2,6 +2,7 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 import { SOP_COMPILER_MODEL } from "@/lib/config/models";
 import { createOpenAIClient } from "@/lib/openai/client";
+import { normalizePolicy } from "@/lib/policy-engine/normalizePolicy";
 import {
   ACTIONS,
   CONDITION_FIELDS,
@@ -81,7 +82,7 @@ export function parseCompiledPolicyOutput(output: unknown): Policy {
     }
   }
 
-  return enforceGeneratedPolicySafety(policy);
+  return normalizePolicy(enforceGeneratedPolicySafety(policy));
 }
 
 export async function compilePolicyFromSop(sopText: string): Promise<Policy> {

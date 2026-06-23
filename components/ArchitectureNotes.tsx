@@ -3,7 +3,7 @@ const notes = [
   ["Action extractor", "LLM structured output"],
   ["Risk signal extraction", "LLM structured output or synthetic demo context"],
   ["Policy engine", "Deterministic TypeScript"],
-  ["Execution boundary", "MCP tool handler or local simulated tool handler"],
+  ["Execution boundary", "Tool execution boundary in the demo runtime"],
   [
     "Refund Abuse Guard",
     "Deterministic policy conditions over risk fields and refund history",

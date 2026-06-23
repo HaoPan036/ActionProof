@@ -1,13 +1,36 @@
+import type { ToolCall } from "@/lib/schemas/toolCall";
+
 type ApprovalPanelProps = {
   visible: boolean;
   approvalStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
+  toolCall: ToolCall | null;
   onApprove: () => void;
   onReject: () => void;
 };
 
+function approvalReason(toolCall: ToolCall | null): string {
+  const amount = toolCall?.amount;
+  const riskLevel = toolCall?.riskLevel;
+
+  if (
+    typeof amount === "number" &&
+    amount <= 50 &&
+    (riskLevel === "MEDIUM" || riskLevel === "HIGH")
+  ) {
+    return "Small refund, but risk signals require human approval.";
+  }
+
+  if (typeof amount === "number" && amount > 50 && amount <= 200) {
+    return "Amount requires human approval before execution.";
+  }
+
+  return "Human approval required before execution.";
+}
+
 export function ApprovalPanel({
   visible,
   approvalStatus,
+  toolCall,
   onApprove,
   onReject,
 }: ApprovalPanelProps) {
@@ -23,7 +46,7 @@ export function ApprovalPanel({
             Approval Panel
           </h2>
           <p className="mt-1 text-sm text-amber-950">
-            Small refund, but risk signals require human approval.
+            {approvalReason(toolCall)}
           </p>
           <p className="mt-1 text-xs text-amber-800">
             Current status: {approvalStatus ?? "PENDING"}

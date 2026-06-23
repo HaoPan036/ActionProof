@@ -2,8 +2,7 @@
 
 PolicyGate is a runtime permission gateway for AI agents. It compiles written SOPs into deterministic policies and enforces those policies before any tool execution.
 
-Phase 1 builds the deterministic foundation. Phase 2 adds OpenAI structured extraction for SOP compilation and candidate action extraction. Phase 3 adds an isolated stdio MCP server with gated tools for a synthetic commerce demo. The app does not connect to real company systems.
-Phase 4 polishes the demo flow with SOP traceability, approval handling, an audit timeline, and a deterministic Refund Abuse Guard.
+Phase 1 builds the deterministic foundation. Phase 2 adds OpenAI structured extraction for SOP compilation and candidate action extraction. Phase 4 polishes the stable demo flow with SOP traceability, approval handling, an audit timeline, and a deterministic Refund Abuse Guard. The app does not connect to real company systems.
 
 ## Why prompt guardrails are insufficient
 
@@ -94,37 +93,6 @@ Final decisions still come only from `decide(toolCall, policy)`.
 
 The full preset flow is designed to fit in a short hackathon demo recording.
 
-## MCP demo
-
-PolicyGate exposes gated MCP tools for a synthetic commerce demo. It is intentionally scoped to the four tools listed below.
-
-Run the stdio MCP server:
-
-```bash
-npm run mcp:dev
-```
-
-Launch MCP Inspector:
-
-```bash
-npm run mcp:inspect
-```
-
-Manual Inspector command:
-
-```bash
-npx @modelcontextprotocol/inspector tsx mcp/server.ts
-```
-
-The MCP server exposes exactly:
-
-- `refund_order`
-- `export_customer_data`
-- `bulk_refund`
-- `modify_policy`
-
-Each tool normalizes arguments into `ToolCall`, calls `decide(toolCall, defaultPolicy)`, writes an audit event, and executes the synthetic tool only when the deterministic decision is `ALLOW`.
-
 ## Run tests
 
 ```bash
@@ -153,7 +121,7 @@ Use `public/demo-screenshots/` for lightweight pitch or Devpost screenshots. Do 
 
 - Phase 1: deterministic foundation
 - Phase 2: OpenAI structured outputs
-- Phase 3: MCP gated tools
+- Phase 3: gated tool adapter experiment
 - Phase 4: UI polish and eval dashboard
 - Phase 5: submission packaging
 
@@ -161,4 +129,4 @@ Use `public/demo-screenshots/` for lightweight pitch or Devpost screenshots. Do 
 
 This repository uses synthetic demo data only. Do not add real company data, internal business rules, internal table names, private customer information, credentials, API keys, or secrets.
 
-There are no credentials in this repo. The deterministic demo and MCP demo do not require external service keys.
+There are no credentials in this repo. The deterministic preset demo does not require external service keys.
