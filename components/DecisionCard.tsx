@@ -12,9 +12,9 @@ type DecisionCardProps = {
 };
 
 const decisionStyles = {
-  ALLOW: "border-emerald-200 bg-emerald-50 text-emerald-900 ring-emerald-100",
-  APPROVAL: "border-amber-200 bg-amber-50 text-amber-950 ring-amber-100",
-  DENY: "border-rose-200 bg-rose-50 text-rose-950 ring-rose-100",
+  ALLOW: "border-emerald-600 text-emerald-600",
+  APPROVAL: "border-amber-500 text-amber-500",
+  DENY: "border-rose-600 text-rose-600",
 } satisfies Record<DecisionResult["decision"], string>;
 
 function executionLabel(
@@ -109,45 +109,45 @@ export function DecisionCard({
   ];
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 className="text-sm font-semibold uppercase text-slate-600">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold text-slate-900">
             Decision and Approval
           </h2>
-          <span className="text-xs font-medium text-slate-500">
+          <span className="text-xs uppercase tracking-wide text-slate-400">
             Deterministic result
           </span>
         </div>
         <span
           className={[
-            "inline-flex rounded-md border px-5 py-3 text-3xl font-black ring-4",
+            "inline-flex rounded-2xl border-2 bg-white px-5 py-4 text-5xl font-semibold leading-none tracking-tight",
             decisionStyles[decision.decision],
           ].join(" ")}
         >
           {decision.decision}
         </span>
       </div>
-      <div className="mb-4 rounded-md border border-slate-200 bg-slate-50 p-4">
-        <div className="text-lg font-bold text-slate-950">
+      <div className="mt-6 rounded-2xl bg-slate-50 p-6">
+        <div className="text-xl font-semibold text-slate-900">
           {executionLabel(decision, executed, approvalStatus)}
         </div>
-        <div className="mt-1 text-sm text-slate-600">
+        <div className="mt-2 text-sm text-slate-600">
           {abuseGuardResult(toolCall)}
         </div>
       </div>
 
-      <div className="mb-4 rounded-md border border-cyan-200 bg-cyan-50 p-3 text-sm text-cyan-950">
-        <div className="font-black">Audit proof</div>
-        <div className="mt-1">{sopLineSummary(sourceLines)}</div>
+      <div className="mt-6 rounded-2xl bg-slate-50 p-6 text-sm text-slate-600">
+        <div className="text-xl font-semibold text-slate-900">Audit proof</div>
+        <div className="mt-2">{sopLineSummary(sourceLines)}</div>
         {sourceLines.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-2">
+          <div className="mt-4 flex flex-wrap gap-3">
             {sourceLines.map((line) => (
               <button
                 key={line}
                 type="button"
                 onClick={() => onSourceLineClick(line)}
-                className="rounded-md border border-cyan-300 bg-white px-2 py-1 font-mono text-xs font-black text-cyan-950 hover:bg-cyan-100"
+                className="rounded-2xl bg-white px-3 py-2 font-mono text-xs text-indigo-600 transition hover:text-slate-900"
               >
                 Line {line}
               </button>
@@ -156,57 +156,61 @@ export function DecisionCard({
         ) : null}
       </div>
 
-      <dl className="grid grid-cols-1 gap-2 text-sm">
+      <dl className="mt-6 grid grid-cols-1 gap-3 text-sm">
         {compactRows.map(([label, value]) => (
           <div
             key={label}
-            className="grid grid-cols-1 gap-1 rounded-md border border-slate-100 px-3 py-2 sm:grid-cols-[9rem_1fr]"
+            className="grid grid-cols-1 gap-2 rounded-2xl bg-slate-50 p-4 sm:grid-cols-[9rem_1fr]"
           >
-            <dt className="font-medium text-slate-500">{label}</dt>
-            <dd className="text-slate-900">{value}</dd>
+            <dt className="text-xs uppercase tracking-wide text-slate-400">
+              {label}
+            </dt>
+            <dd className="text-sm text-slate-600">{value}</dd>
           </div>
         ))}
         <div>
-          <dt className="px-3 pt-2 font-medium text-slate-500">
+          <dt className="px-4 pt-2 text-xs uppercase tracking-wide text-slate-400">
             Source SOP lines
           </dt>
-          <dd className="mt-1 flex flex-wrap gap-2 px-3 pb-2">
+          <dd className="mt-2 flex flex-wrap gap-3 px-4 pb-2">
             {sourceLines.length > 0 ? (
               sourceLines.map((line) => (
                 <button
                   key={line}
                   type="button"
                   onClick={() => onSourceLineClick(line)}
-                  className="rounded-md border border-cyan-200 bg-cyan-50 px-2 py-1 font-mono text-xs font-semibold text-cyan-900 hover:bg-cyan-100"
+                  className="rounded-2xl bg-slate-50 px-3 py-2 font-mono text-xs text-indigo-600 transition hover:text-slate-900"
                 >
                   Line {line}
                 </button>
               ))
             ) : (
-              <span className="text-slate-700">Default fail safe DENY</span>
+              <span className="text-sm text-slate-600">
+                Default fail safe DENY
+              </span>
             )}
           </dd>
         </div>
       </dl>
 
-      <div className="mt-4 grid grid-cols-1 gap-3">
-        <div className="rounded-md border border-slate-100 p-3">
-          <div className="mb-1 text-xs font-medium text-slate-500">
+      <div className="mt-6 grid grid-cols-1 gap-6">
+        <div className="rounded-2xl bg-slate-50 p-6">
+          <div className="text-xs uppercase tracking-wide text-slate-400">
             Raw user request
           </div>
-          <p className="text-sm leading-6 text-slate-700">
+          <p className="mt-2 text-sm leading-6 text-slate-600">
             {toolCall?.rawUserRequest ?? toolCall?.userRequest ?? "Not provided"}
           </p>
         </div>
-        <div>
-          <div className="mb-1 text-xs font-medium text-slate-500">
+        <details className="rounded-2xl bg-slate-50 p-6">
+          <summary className="cursor-pointer text-xs uppercase tracking-wide text-slate-400">
             Candidate ToolCall JSON
-          </div>
-          <pre className="max-h-36 overflow-auto rounded-md bg-slate-950 p-3 text-xs leading-5 text-slate-100">
+          </summary>
+          <pre className="mt-4 max-h-40 overflow-auto rounded-2xl bg-white p-4 font-mono text-xs leading-5 text-slate-600">
             {toolCall ? JSON.stringify(toolCall, null, 2) : "No tool call yet."}
           </pre>
-        </div>
+        </details>
       </div>
-    </section>
+    </div>
   );
 }

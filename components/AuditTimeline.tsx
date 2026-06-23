@@ -8,10 +8,10 @@ type AuditTimelineProps = {
 
 type AuditFilter = "All" | "Allowed" | "Approval" | "Denied" | "Abuse Guard";
 
-const dotStyles = {
-  ALLOW: "bg-emerald-500",
-  APPROVAL: "bg-amber-500",
-  DENY: "bg-rose-500",
+const decisionBadgeStyles = {
+  ALLOW: "border-emerald-600 text-emerald-600",
+  APPROVAL: "border-amber-500 text-amber-500",
+  DENY: "border-rose-600 text-rose-600",
 } satisfies Record<AuditEvent["decision"], string>;
 
 const filters: AuditFilter[] = [
@@ -80,22 +80,22 @@ export function AuditTimeline({ events, onSourceLineClick }: AuditTimelineProps)
   }, [events, filter]);
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-sm font-semibold uppercase text-slate-600">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-semibold text-slate-900">
           Audit Timeline
         </h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {filters.map((item) => (
             <button
               key={item}
               type="button"
               onClick={() => setFilter(item)}
               className={[
-                "rounded-md border px-2 py-1 text-xs font-semibold",
+                "rounded-2xl px-3 py-2 text-xs uppercase tracking-wide transition",
                 filter === item
-                  ? "border-slate-900 bg-slate-900 text-white"
-                  : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                  ? "bg-indigo-600 text-slate-50"
+                  : "bg-slate-50 text-slate-600 hover:text-indigo-600",
               ].join(" ")}
             >
               {item}
@@ -104,50 +104,49 @@ export function AuditTimeline({ events, onSourceLineClick }: AuditTimelineProps)
         </div>
       </div>
       {filteredEvents.length === 0 ? (
-        <p className="rounded-md bg-slate-50 p-3 text-sm text-slate-600">
+        <p className="mt-6 rounded-2xl bg-slate-50 p-6 text-sm text-slate-600">
           No audit events for this filter.
         </p>
       ) : (
-        <ol className="space-y-3">
+        <ol className="mt-6 space-y-6">
           {filteredEvents.map((event) => (
-            <li key={event.id} className="flex gap-3 rounded-md border border-slate-100 p-3">
-              <span
-                className={[
-                  "mt-1 h-2.5 w-2.5 shrink-0 rounded-full",
-                  dotStyles[event.decision],
-                ].join(" ")}
-              />
+            <li key={event.id} className="rounded-2xl bg-slate-50 p-6">
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
-                  <span className="font-semibold text-slate-900">
+                <div className="flex flex-wrap items-center gap-3 text-sm">
+                  <span
+                    className={[
+                      "rounded-2xl border-2 bg-white px-3 py-2 text-xs font-semibold",
+                      decisionBadgeStyles[event.decision],
+                    ].join(" ")}
+                  >
                     {event.decision}
                   </span>
-                  <span className="font-mono text-xs text-slate-500">
+                  <span className="font-mono text-xs text-slate-600">
                     {event.toolCall.action}
                   </span>
                   <span className="text-xs text-slate-400">
                     {new Date(event.timestamp).toLocaleTimeString()}
                   </span>
-                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
+                  <span className="rounded-2xl bg-white px-3 py-2 font-mono text-xs text-slate-600">
                     executed={String(event.executed ?? false)}
                   </span>
                   {event.approvalStatus ? (
-                    <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs text-amber-900">
+                    <span className="rounded-2xl bg-white px-3 py-2 font-mono text-xs text-slate-600">
                       approval={event.approvalStatus}
                     </span>
                   ) : null}
                 </div>
-                <p className="mt-1 text-sm text-slate-700">
+                <p className="mt-4 text-sm leading-6 text-slate-600">
                   {event.toolCall.rawUserRequest ??
                     event.toolCall.userRequest ??
                     "No raw request"}
                 </p>
-                <p className="mt-1 font-mono text-xs text-slate-500">
+                <p className="mt-3 font-mono text-xs text-slate-600">
                   {keyParameters(event)}
                 </p>
-                <p className="mt-1 text-sm text-slate-600">{event.reason}</p>
-                <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                  <span className="font-mono text-slate-500">
+                <p className="mt-3 text-sm text-slate-600">{event.reason}</p>
+                <div className="mt-4 flex flex-wrap gap-3 text-xs">
+                  <span className="font-mono text-slate-600">
                     {event.matchedRuleId ?? "default-deny"}
                   </span>
                   {event.sourceSopLines.map((line) => (
@@ -155,13 +154,13 @@ export function AuditTimeline({ events, onSourceLineClick }: AuditTimelineProps)
                       key={line}
                       type="button"
                       onClick={() => onSourceLineClick(line)}
-                      className="rounded-md border border-cyan-200 bg-cyan-50 px-2 py-0.5 font-mono font-semibold text-cyan-900"
+                      className="rounded-2xl bg-white px-3 py-2 font-mono text-xs text-indigo-600 transition hover:text-slate-900"
                     >
                       SOP {line}
                     </button>
                   ))}
                   {event.toolCall.riskSignals.length > 0 ? (
-                    <span className="text-slate-500">
+                    <span className="text-slate-600">
                       {event.toolCall.riskSignals.join(", ")}
                     </span>
                   ) : null}
@@ -171,6 +170,6 @@ export function AuditTimeline({ events, onSourceLineClick }: AuditTimelineProps)
           ))}
         </ol>
       )}
-    </section>
+    </div>
   );
 }

@@ -13,21 +13,21 @@ const notes = [
 
 export function ArchitectureNotes() {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <h2 className="mb-3 text-sm font-semibold uppercase text-slate-600">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="text-xl font-semibold text-slate-900">
         Architecture Notes
       </h2>
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {notes.map(([title, body]) => (
-          <div key={title} className="rounded-md border border-slate-200 p-3">
-            <div className="text-sm font-semibold text-slate-950">{title}</div>
+          <div key={title} className="rounded-2xl bg-slate-50 p-6">
+            <div className="text-xl font-semibold text-slate-900">{title}</div>
             <div className="mt-1 text-sm leading-6 text-slate-600">{body}</div>
           </div>
         ))}
       </div>
-      <p className="mt-3 rounded-md bg-slate-50 p-3 text-sm text-slate-700">
+      <p className="mt-6 rounded-2xl bg-slate-50 p-6 text-sm leading-6 text-slate-600">
         PolicyGate gates synthetic commerce tool calls at the execution boundary.
       </p>
-    </section>
+    </div>
   );
 }

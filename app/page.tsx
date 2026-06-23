@@ -202,80 +202,77 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <header className="mb-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-          <div className="grid grid-cols-1 gap-5 border-b border-slate-100 bg-slate-950 px-5 py-6 text-white sm:px-7 lg:grid-cols-[1fr_18rem] lg:items-end">
-            <div>
-              <p className="text-sm font-semibold uppercase text-cyan-300">
-                Runtime Permission Gateway
-              </p>
-              <h1 className="mt-2 text-5xl font-black tracking-normal sm:text-6xl">
-                PolicyGate
-              </h1>
-              <p className="mt-4 max-w-4xl text-2xl font-bold leading-tight text-white sm:text-3xl">
-                Prompts are suggestions a model can ignore. PolicyGate is
-                enforcement a model cannot.
-              </p>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
-                A deterministic runtime permission gateway for AI agent tool
-                calls.
-              </p>
-            </div>
-            <div className="rounded-md border border-white/10 bg-white/10 p-4">
-              <div className="text-xs font-semibold uppercase text-cyan-200">
-                Final authority
-              </div>
-              <div className="mt-2 text-3xl font-black">TypeScript</div>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                The model may suggest a candidate action. PolicyGate enforces
-                the final decision.
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:p-5">
-            {valueCards.map((card) => (
-              <div
-                key={card.title}
-                className="rounded-md border border-slate-200 bg-slate-50 p-4 shadow-sm"
-              >
-                <div className="text-sm font-bold text-slate-950">
-                  {card.title}
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <section className="py-12">
+        <div className="mx-auto max-w-5xl px-6">
+          <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-slate-400">
+              Runtime Permission Gateway
+            </p>
+            <h1 className="mt-4 text-5xl font-semibold tracking-tight">
+              PolicyGate
+            </h1>
+            <p className="mt-6 max-w-4xl text-xl font-semibold leading-8 text-slate-900">
+              Prompts are suggestions a model can ignore. PolicyGate is
+              enforcement a model cannot.
+            </p>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
+              A deterministic runtime permission gateway for AI agent tool
+              calls.
+            </p>
+
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+              {valueCards.map((card) => (
+                <div key={card.title} className="rounded-2xl bg-slate-50 p-6">
+                  <div className="text-xl font-semibold text-slate-900">
+                    {card.title}
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    {card.body}
+                  </p>
                 </div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {card.body}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="border-t border-slate-100 px-5 py-3 text-sm text-slate-600">
-            AI extracts candidate actions and risk signals. PolicyGate enforces
-            the final decision with deterministic code.
-          </div>
-        </header>
+              ))}
+            </div>
 
-        <PresentationMode
-          presets={toolPresets}
-          selectedPresetId={selectedPresetId}
-          scenarioLabel={currentScenarioLabel}
-          decision={decision}
-          toolCall={currentToolCall}
-          executed={executed}
-          approvalStatus={approvalStatus}
-          sopText={sopText}
-          onRunPreset={runPreset}
-          onSourceLineClick={handleSourceLineClick}
-        />
-
-        <div className="mb-4 mt-6 flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200" />
-          <h2 className="text-sm font-black uppercase text-slate-500">
-            Technical Details
-          </h2>
-          <div className="h-px flex-1 bg-slate-200" />
+            <p className="mt-6 text-sm leading-6 text-slate-600">
+              AI extracts candidate actions and risk signals. PolicyGate
+              enforces the final decision with deterministic code.
+            </p>
+          </header>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <section className="py-12">
+        <div className="mx-auto max-w-5xl px-6">
+          <PresentationMode
+            presets={toolPresets}
+            selectedPresetId={selectedPresetId}
+            scenarioLabel={currentScenarioLabel}
+            decision={decision}
+            toolCall={currentToolCall}
+            executed={executed}
+            approvalStatus={approvalStatus}
+            sopText={sopText}
+            onRunPreset={runPreset}
+            onSourceLineClick={handleSourceLineClick}
+          />
+        </div>
+      </section>
+
+      <section className="py-12">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="flex items-center gap-6">
+            <div className="h-px flex-1 bg-slate-200" />
+            <h2 className="text-xl font-semibold text-slate-900">
+              Technical Details
+            </h2>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-6 lg:grid-cols-2">
           <SopEditor
             value={sopText}
             onChange={setSopText}
@@ -288,8 +285,10 @@ export default function Home() {
           />
           <PolicyViewer policy={policy} />
         </div>
+      </section>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[1.08fr_0.92fr]">
+      <section className="py-12">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-6 lg:grid-cols-[1.08fr_0.92fr]">
           <RequestSimulator
             presets={toolPresets}
             selectedPresetId={selectedPresetId}
@@ -301,7 +300,7 @@ export default function Home() {
             isExtracting={isExtracting}
             error={extractError}
           />
-          <div className="space-y-4">
+          <div className="space-y-6">
             <DecisionCard
               decision={decision}
               toolCall={currentToolCall}
@@ -318,19 +317,23 @@ export default function Home() {
             />
           </div>
         </div>
+      </section>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+      <section className="py-12">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 px-6 lg:grid-cols-[0.95fr_1.05fr]">
           <AuditTimeline
             events={auditEvents}
             onSourceLineClick={handleSourceLineClick}
           />
           <EvalDashboard />
         </div>
+      </section>
 
-        <div className="mt-4">
+      <section className="py-12">
+        <div className="mx-auto max-w-5xl px-6">
           <ArchitectureNotes />
         </div>
-      </div>
+      </section>
     </main>
   );
 }

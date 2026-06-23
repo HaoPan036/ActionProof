@@ -26,11 +26,55 @@ const presentationScenarioIds = [
   "deny-repeated-refund-abuse",
 ];
 
-const decisionStyles = {
-  ALLOW: "border-emerald-300 bg-emerald-50 text-emerald-900",
-  APPROVAL: "border-amber-300 bg-amber-50 text-amber-950",
-  DENY: "border-rose-300 bg-rose-50 text-rose-950",
+const decisionBadgeStyles = {
+  ALLOW: "border-emerald-600 bg-emerald-50 text-emerald-600",
+  APPROVAL: "border-amber-500 bg-amber-50 text-amber-500",
+  DENY: "border-rose-600 bg-rose-50 text-rose-600",
 } satisfies Record<DecisionResult["decision"], string>;
+
+const decisionSoftStyles = {
+  ALLOW: "bg-emerald-50 text-emerald-600",
+  APPROVAL: "bg-amber-50 text-amber-500",
+  DENY: "bg-rose-50 text-rose-600",
+} satisfies Record<DecisionResult["decision"], string>;
+
+const decisionTextStyles = {
+  ALLOW: "text-emerald-600",
+  APPROVAL: "text-amber-500",
+  DENY: "text-rose-600",
+} satisfies Record<DecisionResult["decision"], string>;
+
+const decisionTitle = {
+  ALLOW: "Allowed",
+  APPROVAL: "Approval",
+  DENY: "Denied",
+} satisfies Record<DecisionResult["decision"], string>;
+
+const refundMatrix = [
+  {
+    risk: "Low risk",
+    low: "ALLOW",
+    medium: "APPROVAL",
+    high: "DENY",
+  },
+  {
+    risk: "Medium / high risk",
+    low: "APPROVAL",
+    medium: "APPROVAL",
+    high: "DENY",
+  },
+  {
+    risk: "Repeated abuse",
+    low: "DENY",
+    medium: "DENY",
+    high: "DENY",
+  },
+] satisfies Array<{
+  risk: string;
+  low: DecisionResult["decision"];
+  medium: DecisionResult["decision"];
+  high: DecisionResult["decision"];
+}>;
 
 function formatPercent(value: number): string {
   return `${Math.round(value * 100)}%`;
@@ -68,10 +112,75 @@ function displayValue(value: unknown): string {
   return String(value);
 }
 
+function displayAmount(value: unknown): string {
+  if (typeof value === "number") {
+    return `$${value}`;
+  }
+
+  return displayValue(value);
+}
+
 function getSopLineText(sopText: string, line: number): string {
   const rawLine = sopText.split("\n")[line - 1]?.trim();
 
   return rawLine ? rawLine.replace(/^\d+\.\s*/, "") : "Source line not found.";
+}
+
+function flowRequestLabel(toolCall: ToolCall | null, scenarioLabel: string) {
+  if (toolCall?.action === "refund_order" && typeof toolCall.amount === "number") {
+    return `"Refund $${toolCall.amount}"`;
+  }
+
+  return scenarioLabel;
+}
+
+function MatrixBadge({ decision }: { decision: DecisionResult["decision"] }) {
+  return (
+    <span
+      className={[
+        "inline-flex rounded-2xl border px-3 py-1 text-xs font-semibold",
+        decisionBadgeStyles[decision],
+      ].join(" ")}
+    >
+      {decisionTitle[decision]}
+    </span>
+  );
+}
+
+function FlowStep({
+  title,
+  subtitle,
+  activeDecision,
+}: {
+  title: string;
+  subtitle: string;
+  activeDecision?: DecisionResult["decision"];
+}) {
+  return (
+    <div
+      className={[
+        "min-w-0 flex-1 rounded-2xl p-4 text-center",
+        activeDecision ? decisionSoftStyles[activeDecision] : "bg-slate-50",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "text-sm font-semibold",
+          activeDecision ? decisionTextStyles[activeDecision] : "text-slate-900",
+        ].join(" ")}
+      >
+        {title}
+      </div>
+      <div
+        className={[
+          "mt-2 truncate text-xs",
+          activeDecision ? decisionTextStyles[activeDecision] : "text-slate-400",
+        ].join(" ")}
+      >
+        {subtitle}
+      </div>
+    </div>
+  );
 }
 
 export function PresentationMode({
@@ -97,171 +206,220 @@ export function PresentationMode({
     : "Default fail safe DENY";
   const metrics = [
     [`${report.totalCases}`, "Deterministic cases"],
-    [formatPercent(report.metrics.policyDecisionAccuracy), "Policy decision accuracy"],
+    [formatPercent(report.metrics.policyDecisionAccuracy), "Decision accuracy"],
     [formatPercent(report.metrics.falseAllowRate), "False allow rate"],
     [formatPercent(report.metrics.abuseGuardAccuracy), "Abuse guard accuracy"],
   ];
 
   return (
-    <section className="mb-5 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 bg-slate-50 px-4 py-4 sm:px-5">
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h2 className="text-2xl font-black text-slate-950">
-              Live Permission Demo
-            </h2>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-              Choose a scenario and see whether the agent action is allowed,
-              routed to approval, or denied before execution.
-            </p>
-          </div>
-          <div className="rounded-md border border-cyan-200 bg-cyan-50 px-3 py-2 text-xs font-semibold text-cyan-950">
-            Final decision: deterministic TypeScript
-          </div>
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-wide text-slate-400">
+            Presentation Mode
+          </p>
+          <h2 className="mt-2 text-xl font-semibold text-slate-900">
+            Live Permission Demo
+          </h2>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+            Choose a scenario and watch the request move from AI extraction to
+            deterministic enforcement and SOP-linked audit proof.
+          </p>
         </div>
+        <p className="text-xs uppercase tracking-wide text-slate-400">
+          Final decision: deterministic TypeScript
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-[0.8fr_1.25fr] xl:grid-cols-[0.72fr_1.28fr_0.9fr]">
-        <div className="rounded-md border border-slate-200 p-3">
-          <h3 className="text-xs font-black uppercase text-slate-500">
-            Scenario selector
-          </h3>
-          <div className="mt-3 grid grid-cols-1 gap-2">
-            {scenarioPresets.map((preset) => {
-              const isSelected = preset.id === selectedPresetId;
+      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {scenarioPresets.map((preset) => {
+          const isSelected = preset.id === selectedPresetId;
 
-              return (
-                <button
-                  key={preset.id}
-                  type="button"
-                  onClick={() => onRunPreset(preset)}
-                  className={[
-                    "rounded-md border px-3 py-3 text-left text-sm font-black transition",
-                    isSelected
-                      ? "border-slate-950 bg-slate-950 text-white shadow-sm"
-                      : "border-slate-200 bg-white text-slate-800 hover:border-cyan-300 hover:bg-cyan-50",
-                  ].join(" ")}
-                >
-                  {preset.label}
-                </button>
-              );
-            })}
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => onRunPreset(preset)}
+              className={[
+                "rounded-2xl px-4 py-3 text-left text-sm font-semibold transition",
+                isSelected
+                  ? "bg-indigo-600 text-slate-50"
+                  : "bg-slate-50 text-slate-600 hover:text-indigo-600",
+              ].join(" ")}
+            >
+              {preset.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mt-6 flex flex-col gap-2 md:flex-row md:items-stretch">
+        <FlowStep
+          title="User request"
+          subtitle={flowRequestLabel(toolCall, scenarioLabel)}
+        />
+        <div className="hidden items-center text-slate-400 md:flex">{">"}</div>
+        <FlowStep title="AI extracts" subtitle="candidate action" />
+        <div className="hidden items-center text-slate-400 md:flex">{">"}</div>
+        <FlowStep title="PolicyGate" subtitle="deterministic" />
+        <div className="hidden items-center text-slate-400 md:flex">{">"}</div>
+        <FlowStep
+          title="Decision"
+          subtitle={decisionTitle[decision.decision]}
+          activeDecision={decision.decision}
+        />
+        <div className="hidden items-center text-slate-400 md:flex">{">"}</div>
+        <FlowStep title="Audit proof" subtitle="SOP linked" />
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+        <div className="rounded-2xl bg-slate-50 p-6">
+          <p className="text-xs text-slate-400">
+            Scenario · {scenarioLabel}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <span
+              className={[
+                "inline-flex rounded-2xl border-2 px-5 py-3 text-5xl font-semibold leading-none tracking-tight",
+                decisionBadgeStyles[decision.decision],
+              ].join(" ")}
+            >
+              {decisionTitle[decision.decision]}
+            </span>
+            <span className="text-xl font-semibold text-slate-900">
+              {execution}
+            </span>
           </div>
-        </div>
 
-        <div
-          className={[
-            "rounded-md border p-4 shadow-sm",
-            decisionStyles[decision.decision],
-          ].join(" ")}
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <div className="text-xs font-black uppercase">Decision</div>
-              <div className="mt-2 text-6xl font-black leading-none">
-                {decision.decision}
-              </div>
-              <div className="mt-3 text-xl font-black">{execution}</div>
-              <div className="mt-2 text-sm font-semibold">
-                Scenario: {scenarioLabel}
-              </div>
-            </div>
-            <div className="rounded-md border border-current/20 bg-white/60 px-3 py-2 text-sm font-black">
-              executed={String(executed)}
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-            <div className="rounded-md border border-current/15 bg-white/50 p-3">
-              <div className="text-xs font-semibold uppercase opacity-70">
-                Action
-              </div>
-              <div className="mt-1 font-mono font-black">
+              <div className="text-xs text-slate-400">Action</div>
+              <div className="mt-2 font-mono text-xs text-slate-900">
                 {toolCall?.action ?? "unknown"}
               </div>
             </div>
-            <div className="rounded-md border border-current/15 bg-white/50 p-3">
-              <div className="text-xs font-semibold uppercase opacity-70">
-                Amount
-              </div>
-              <div className="mt-1 font-black">
-                {displayValue(toolCall?.amount)}
+            <div>
+              <div className="text-xs text-slate-400">Amount</div>
+              <div className="mt-2 text-sm font-semibold text-slate-900">
+                {displayAmount(toolCall?.amount)}
               </div>
             </div>
-            <div className="rounded-md border border-current/15 bg-white/50 p-3">
-              <div className="text-xs font-semibold uppercase opacity-70">
-                Matched rule
-              </div>
-              <div className="mt-1 break-all font-mono text-xs font-black">
+            <div>
+              <div className="text-xs text-slate-400">Matched rule</div>
+              <div className="mt-2 break-all font-mono text-xs text-slate-900">
                 {decision.matchedRuleId ?? "default-deny"}
               </div>
             </div>
-            <div className="rounded-md border border-current/15 bg-white/50 p-3">
-              <div className="text-xs font-semibold uppercase opacity-70">
-                Risk level
+            <div>
+              <div className="text-xs text-slate-400">Executed</div>
+              <div className="mt-2 font-mono text-xs text-slate-900">
+                {String(executed)}
               </div>
-              <div className="mt-1 font-black">
+            </div>
+            <div>
+              <div className="text-xs text-slate-400">Risk level</div>
+              <div className="mt-2 text-sm text-slate-600">
                 {displayValue(toolCall?.riskLevel)}
               </div>
             </div>
-          </div>
-          <div className="mt-3 rounded-md border border-current/15 bg-white/50 p-3 text-sm">
-            <div className="text-xs font-semibold uppercase opacity-70">
-              Short reason
+            <div>
+              <div className="text-xs text-slate-400">Risk signals</div>
+              <div className="mt-2 text-sm text-slate-600">
+                {toolCall?.riskSignals?.length
+                  ? toolCall.riskSignals.join(", ")
+                  : "None"}
+              </div>
             </div>
-            <div className="mt-1 font-semibold">{decision.reason}</div>
+          </div>
+
+          <div className="mt-6">
+            <div className="text-xs text-slate-400">Reason</div>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              {decision.reason}
+            </p>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4">
-          <div className="rounded-md border border-cyan-200 bg-cyan-50 p-4 text-cyan-950">
-            <h3 className="text-xs font-black uppercase">SOP proof</h3>
-            <div className="mt-2 text-sm font-semibold">Audit proof:</div>
+        <div className="grid grid-cols-1 gap-6">
+          <div className="rounded-2xl bg-slate-50 p-6">
+            <h3 className="text-xl font-semibold text-slate-900">
+              Audit proof
+            </h3>
             {primarySourceLine ? (
               <>
-                <p className="mt-1 text-sm leading-6">
+                <p className="mt-3 text-sm leading-6 text-slate-600">
                   This decision is backed by SOP line {primarySourceLine}.
                 </p>
                 <button
                   type="button"
                   onClick={() => onSourceLineClick(primarySourceLine)}
-                  className="mt-3 rounded-md border border-cyan-300 bg-white p-3 text-left text-sm font-semibold text-cyan-950 hover:bg-cyan-100"
+                  className="mt-4 w-full rounded-2xl bg-white p-4 text-left text-sm text-slate-600 transition hover:text-indigo-600"
                 >
-                  <span className="font-mono text-xs font-black">
+                  <span className="font-mono text-xs text-indigo-600">
                     Line {primarySourceLine}
                   </span>
                   <span className="mt-1 block leading-6">{proofText}</span>
                 </button>
               </>
             ) : (
-              <p className="mt-2 rounded-md border border-cyan-200 bg-white p-3 text-sm font-black">
+              <p className="mt-4 rounded-2xl bg-white p-4 text-sm text-slate-600">
                 Default fail safe DENY
               </p>
             )}
           </div>
 
-          <div className="rounded-md border border-slate-200 p-4">
-            <h3 className="text-xs font-black uppercase text-slate-500">
+          <div className="rounded-2xl bg-slate-50 p-6">
+            <h3 className="text-xl font-semibold text-slate-900">
               Eval proof
             </h3>
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-4 grid grid-cols-2 gap-3">
               {metrics.map(([value, label]) => (
-                <div
-                  key={label}
-                  className="rounded-md border border-slate-200 bg-slate-50 p-3"
-                >
-                  <div className="text-2xl font-black text-slate-950">
+                <div key={label} className="rounded-2xl bg-white p-4">
+                  <div className="text-2xl font-semibold text-slate-900">
                     {value}
                   </div>
-                  <div className="mt-1 text-xs font-semibold leading-4 text-slate-600">
-                    {label}
-                  </div>
+                  <div className="mt-2 text-xs text-slate-400">{label}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
-    </section>
+
+      <div className="mt-6 overflow-x-auto rounded-2xl bg-slate-50 p-6">
+        <table className="w-full min-w-[36rem] table-fixed border-collapse">
+          <thead>
+            <tr>
+              <th className="p-2 text-left text-xs font-normal text-slate-400" />
+              <th className="p-2 text-center text-xs font-normal text-slate-400">
+                {"<= $50"}
+              </th>
+              <th className="p-2 text-center text-xs font-normal text-slate-400">
+                $50-$200
+              </th>
+              <th className="p-2 text-center text-xs font-normal text-slate-400">
+                &gt; $200
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {refundMatrix.map((row) => (
+              <tr key={row.risk}>
+                <td className="p-2 text-sm text-slate-600">{row.risk}</td>
+                <td className="p-2 text-center">
+                  <MatrixBadge decision={row.low} />
+                </td>
+                <td className="p-2 text-center">
+                  <MatrixBadge decision={row.medium} />
+                </td>
+                <td className="p-2 text-center">
+                  <MatrixBadge decision={row.high} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

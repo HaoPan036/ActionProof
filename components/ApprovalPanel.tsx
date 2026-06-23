@@ -39,25 +39,25 @@ export function ApprovalPanel({
   }
 
   return (
-    <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold uppercase text-amber-900">
+          <h2 className="text-xl font-semibold text-slate-900">
             Approval Panel
           </h2>
-          <p className="mt-1 text-sm text-amber-950">
+          <p className="mt-3 text-sm text-slate-600">
             {approvalReason(toolCall)}
           </p>
-          <p className="mt-1 text-xs text-amber-800">
+          <p className="mt-2 text-xs uppercase tracking-wide text-slate-400">
             Current status: {approvalStatus ?? "PENDING"}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <button
             type="button"
             onClick={onApprove}
             disabled={approvalStatus === "APPROVED"}
-            className="rounded-md bg-emerald-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-slate-50 transition disabled:cursor-not-allowed disabled:opacity-50"
           >
             Approve
           </button>
@@ -65,12 +65,12 @@ export function ApprovalPanel({
             type="button"
             onClick={onReject}
             disabled={approvalStatus === "REJECTED"}
-            className="rounded-md bg-rose-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-rose-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Reject
           </button>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

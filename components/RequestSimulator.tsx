@@ -17,12 +17,10 @@ const presetGroups = [
   {
     title: "Safe",
     ids: ["allow-low-risk-refund"],
-    tone: "border-emerald-200 bg-emerald-50 text-emerald-900",
   },
   {
     title: "Needs Review",
     ids: ["approval-suspicious-small-refund", "approval-refund-120"],
-    tone: "border-amber-200 bg-amber-50 text-amber-950",
   },
   {
     title: "Blocked",
@@ -34,7 +32,6 @@ const presetGroups = [
       "deny-bulk-refund",
       "deny-modify-policy",
     ],
-    tone: "border-rose-200 bg-rose-50 text-rose-950",
   },
 ];
 
@@ -58,38 +55,33 @@ export function RequestSimulator({
     presets.find((preset) => preset.id === selectedPresetId) ?? presets[0];
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase text-slate-600">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold text-slate-900">
           Agent Request Simulator
         </h2>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs uppercase tracking-wide text-slate-400">
           AI extracts; PolicyGate decides
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <div>
-          <h3 className="mb-2 text-xs font-semibold uppercase text-slate-500">
+          <h3 className="text-xs uppercase tracking-wide text-slate-400">
             Mode A: Preset Tool Calls
           </h3>
-          <div className="space-y-3">
+          <div className="mt-4 space-y-6">
             {presetGroups.map((group) => {
               const groupPresets = group.ids
                 .map((id) => presets.find((preset) => preset.id === id))
                 .filter((preset): preset is ToolPreset => Boolean(preset));
 
               return (
-                <div key={group.title} className="rounded-md border border-slate-200 p-2">
-                  <div
-                    className={[
-                      "mb-2 rounded-md border px-2 py-1 text-xs font-black uppercase",
-                      group.tone,
-                    ].join(" ")}
-                  >
+                <div key={group.title} className="rounded-2xl bg-slate-50 p-4">
+                  <div className="text-xs uppercase tracking-wide text-slate-400">
                     {group.title}
                   </div>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-1">
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1">
                     {groupPresets.map((preset) => {
                       const isSelected = preset.id === selectedPresetId;
                       const isRecordingTarget = recordingTargetIds.has(preset.id);
@@ -100,17 +92,15 @@ export function RequestSimulator({
                           type="button"
                           onClick={() => onRunPreset(preset)}
                           className={[
-                            "rounded-md border px-3 py-2 text-left text-sm font-bold transition",
+                            "rounded-2xl px-4 py-3 text-left text-sm font-semibold transition",
                             isSelected
-                              ? "border-cyan-700 bg-cyan-50 text-cyan-950 ring-2 ring-cyan-100"
-                              : isRecordingTarget
-                                ? "border-rose-300 bg-rose-50 text-rose-950 shadow-sm hover:border-rose-500"
-                                : "border-slate-200 bg-white text-slate-700 hover:border-cyan-300 hover:bg-slate-50",
+                              ? "bg-indigo-600 text-slate-50"
+                              : "bg-white text-slate-600 hover:text-indigo-600",
                           ].join(" ")}
                         >
                           <span>{preset.label}</span>
                           {isRecordingTarget ? (
-                            <span className="mt-1 block text-xs font-semibold uppercase text-rose-700">
+                            <span className="mt-2 block text-xs uppercase tracking-wide text-slate-400">
                               Recording target
                             </span>
                           ) : null}
@@ -125,51 +115,51 @@ export function RequestSimulator({
         </div>
 
         <div>
-          <h3 className="mb-2 text-xs font-semibold uppercase text-slate-500">
+          <h3 className="text-xs uppercase tracking-wide text-slate-400">
             Mode B: Natural Language Request
           </h3>
           <textarea
             value={naturalRequest}
             onChange={(event) => onNaturalRequestChange(event.target.value)}
-            className="min-h-36 w-full resize-y rounded-md border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-800 outline-none transition focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100"
+            className="mt-4 min-h-36 w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600 outline-none transition focus:border-indigo-600 focus:bg-white"
             placeholder="Refund order ord_syn_1004 for $30. No evidence was provided and this customer has recent refund activity."
           />
           <button
             type="button"
             onClick={onExtractAction}
             disabled={isExtracting}
-            className="mt-2 rounded-md bg-slate-950 px-3 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="mt-3 rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-slate-50 transition disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isExtracting ? "Extracting..." : "Extract Action"}
           </button>
           {error ? (
-            <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+            <p className="mt-4 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
               {error}
             </p>
           ) : null}
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 xl:grid-cols-2">
-        <div>
-          <div className="mb-1 text-xs font-medium text-slate-500">
+      <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <details className="rounded-2xl bg-slate-50 p-6">
+          <summary className="cursor-pointer text-xs uppercase tracking-wide text-slate-400">
             Selected preset ToolCall
-          </div>
-          <pre className="max-h-36 overflow-auto rounded-md bg-slate-100 p-3 text-xs leading-5 text-slate-800">
+          </summary>
+          <pre className="mt-4 max-h-40 overflow-auto rounded-2xl bg-white p-4 font-mono text-xs leading-5 text-slate-600">
             {JSON.stringify(selectedPreset.toolCall, null, 2)}
           </pre>
-        </div>
-        <div>
-          <div className="mb-1 text-xs font-medium text-slate-500">
+        </details>
+        <details className="rounded-2xl bg-slate-50 p-6">
+          <summary className="cursor-pointer text-xs uppercase tracking-wide text-slate-400">
             Extracted ToolCall
-          </div>
-          <pre className="max-h-36 overflow-auto rounded-md bg-slate-950 p-3 text-xs leading-5 text-slate-100">
+          </summary>
+          <pre className="mt-4 max-h-40 overflow-auto rounded-2xl bg-white p-4 font-mono text-xs leading-5 text-slate-600">
             {extractedToolCall
               ? JSON.stringify(extractedToolCall, null, 2)
               : "No extracted tool call yet."}
           </pre>
-        </div>
+        </details>
       </div>
-    </section>
+    </div>
   );
 }

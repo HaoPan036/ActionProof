@@ -5,35 +5,41 @@ type PolicyViewerProps = {
 };
 
 const policySummary = [
-  ["Low value + low risk refund", "ALLOW", "text-emerald-800 bg-emerald-50 border-emerald-200"],
-  ["Suspicious small refund", "APPROVAL", "text-amber-900 bg-amber-50 border-amber-200"],
-  ["Repeated refund abuse", "DENY", "text-rose-900 bg-rose-50 border-rose-200"],
-  ["High value refund", "DENY", "text-rose-900 bg-rose-50 border-rose-200"],
-  ["Customer data export", "DENY", "text-rose-900 bg-rose-50 border-rose-200"],
+  ["Low value + low risk refund", "ALLOW"],
+  ["Suspicious small refund", "APPROVAL"],
+  ["Repeated refund abuse", "DENY"],
+  ["High value refund", "DENY"],
+  ["Customer data export", "DENY"],
 ];
+
+const decisionStyles = {
+  ALLOW: "border-emerald-600 text-emerald-600",
+  APPROVAL: "border-amber-500 text-amber-500",
+  DENY: "border-rose-600 text-rose-600",
+} as const;
 
 export function PolicyViewer({ policy }: PolicyViewerProps) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase text-slate-600">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-xl font-semibold text-slate-900">
           Policy Summary
         </h2>
-        <span className="text-xs text-slate-500">
+        <span className="font-mono text-xs text-slate-400">
           defaultDecision: {policy.defaultDecision}
         </span>
       </div>
-      <div className="mb-3 grid grid-cols-1 gap-2">
-        {policySummary.map(([label, decision, styles]) => (
+      <div className="mt-6 grid grid-cols-1 gap-3">
+        {policySummary.map(([label, decision]) => (
           <div
             key={label}
-            className="flex items-center justify-between gap-3 rounded-md border border-slate-200 bg-slate-50 px-3 py-2"
+            className="flex items-center justify-between gap-3 rounded-2xl bg-slate-50 p-4"
           >
-            <span className="text-sm font-medium text-slate-700">{label}</span>
+            <span className="text-sm text-slate-600">{label}</span>
             <span
               className={[
-                "rounded-md border px-2 py-1 text-xs font-black",
-                styles,
+                "rounded-2xl border-2 bg-white px-3 py-2 text-xs font-semibold",
+                decisionStyles[decision as keyof typeof decisionStyles],
               ].join(" ")}
             >
               {decision}
@@ -41,12 +47,14 @@ export function PolicyViewer({ policy }: PolicyViewerProps) {
           </div>
         ))}
       </div>
-      <div className="mb-1 text-xs font-medium text-slate-500">
-        Raw Policy JSON
-      </div>
-      <pre className="max-h-64 overflow-auto rounded-md bg-slate-950 p-4 text-xs leading-5 text-slate-100">
-        {JSON.stringify(policy, null, 2)}
-      </pre>
-    </section>
+      <details className="mt-6 rounded-2xl bg-slate-50 p-6">
+        <summary className="cursor-pointer text-xs uppercase tracking-wide text-slate-400">
+          Raw Policy JSON
+        </summary>
+        <pre className="mt-4 max-h-64 overflow-auto rounded-2xl bg-white p-4 font-mono text-xs leading-5 text-slate-600">
+          {JSON.stringify(policy, null, 2)}
+        </pre>
+      </details>
+    </div>
   );
 }
