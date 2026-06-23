@@ -11,12 +11,13 @@ function countByCategory(category: string): number {
 }
 
 describe("policy engine", () => {
-  it("evaluates the 25 labeled fixtures with deterministic decisions", () => {
-    expect(evalCases).toHaveLength(25);
+  it("evaluates all labeled fixtures with deterministic decisions", () => {
+    expect(evalCases.length).toBeGreaterThanOrEqual(31);
     expect(countByCategory("allow_refund")).toBe(8);
     expect(countByCategory("approval_refund")).toBe(6);
     expect(countByCategory("deny")).toBe(6);
     expect(countByCategory("red_team")).toBe(5);
+    expect(countByCategory("abuse_guard")).toBe(6);
 
     for (const testCase of evalCases) {
       const firstDecision = decide(testCase.toolCall, defaultPolicy);
@@ -29,29 +30,51 @@ describe("policy engine", () => {
     }
   });
 
-  it("allows refund amounts up to and including 50", () => {
+  it("allows small refunds only when risk is LOW and abuse guard is clear", () => {
     for (const testCase of evalCases.filter(
       (item) => item.category === "allow_refund",
     )) {
       const decision = decide(testCase.toolCall, defaultPolicy);
 
       expect(testCase.toolCall.amount).toBeLessThanOrEqual(50);
+      expect(testCase.toolCall.riskLevel).toBe("LOW");
       expect(decision.decision).toBe("ALLOW");
-      expect(decision.matchedRuleId).toBe("allow-refund-up-to-50");
+      expect(decision.matchedRuleId).toBe("allow-low-risk-refund-up-to-50");
     }
   });
 
-  it("routes refund amounts above 50 and up to 200 to approval", () => {
+  it("routes suspicious small refunds and mid-value refunds to approval", () => {
     for (const testCase of evalCases.filter(
       (item) => item.category === "approval_refund",
     )) {
       const decision = decide(testCase.toolCall, defaultPolicy);
 
-      expect(testCase.toolCall.amount).toBeGreaterThan(50);
-      expect(testCase.toolCall.amount).toBeLessThanOrEqual(200);
       expect(decision.decision).toBe("APPROVAL");
-      expect(decision.matchedRuleId).toBe(
-        "approve-refund-over-50-up-to-200",
+      if ((testCase.toolCall.amount ?? 0) <= 50) {
+        expect(["MEDIUM", "HIGH"]).toContain(testCase.toolCall.riskLevel);
+        expect(decision.reason).toContain("risk");
+      } else {
+        expect(testCase.toolCall.amount).toBeLessThanOrEqual(200);
+        expect(decision.matchedRuleId).toBe(
+          "approve-refund-over-50-up-to-200",
+        );
+      }
+    }
+  });
+
+  it("denies refund abuse before small refund allow rules", () => {
+    const abuseCases = evalCases.filter(
+      (item) => item.category === "abuse_guard",
+    );
+
+    for (const testCase of abuseCases) {
+      const decision = decide(testCase.toolCall, defaultPolicy);
+
+      expect(testCase.toolCall.amount).toBeLessThanOrEqual(50);
+      expect(testCase.toolCall.riskLevel).toBe("LOW");
+      expect(decision.decision).toBe("DENY");
+      expect(decision.sourceSopLines.some((line) => [5, 6, 7].includes(line))).toBe(
+        true,
       );
     }
   });
@@ -114,6 +137,14 @@ describe("policy engine", () => {
       reason_category: "shipping_delay",
       contains_prompt_injection: false,
       action_count: 1,
+      riskLevel: "LOW",
+      riskSignals: [],
+      evidenceProvided: true,
+      hasDeliveryIssue: true,
+      refundCount30d: 0,
+      refundAmount30d: 0,
+      accountAgeDays: 90,
+      sameAddressRefundCount30d: 0,
     };
 
     const matchingConditions: Condition[] = [
@@ -125,6 +156,13 @@ describe("policy engine", () => {
       { field: "amount", operator: "gte", value: 42 },
       { field: "customer_data_type", operator: "in", value: ["email"] },
       { field: "reason_category", operator: "contains", value: "delay" },
+      { field: "risk_level", operator: "eq", value: "LOW" },
+      { field: "evidence_provided", operator: "eq", value: true },
+      { field: "has_delivery_issue", operator: "eq", value: true },
+      { field: "refund_count_30d", operator: "lt", value: 5 },
+      { field: "refund_amount_30d", operator: "lte", value: 200 },
+      { field: "account_age_days", operator: "gte", value: 30 },
+      { field: "same_address_refund_count_30d", operator: "lt", value: 10 },
     ];
 
     for (const condition of matchingConditions) {

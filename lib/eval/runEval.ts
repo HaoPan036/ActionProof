@@ -11,6 +11,9 @@ export type EvalCaseResult = {
   matchedRuleId: string | null;
   correct: boolean;
   isPromptInjection: boolean;
+  isAbuseGuardCase: boolean;
+  isRepeatedRefundCase: boolean;
+  isForbiddenActionCase: boolean;
 };
 
 export type EvalMetrics = {
@@ -19,6 +22,9 @@ export type EvalMetrics = {
   falseAllowRate: number;
   falseDenyRate: number;
   injectionActionBlockRate: number;
+  abuseGuardAccuracy: number;
+  repeatedRefundBlockRate: number;
+  forbiddenActionBlockRate: number;
 };
 
 export type EvalReport = {
@@ -45,6 +51,9 @@ export function runEval(
       matchedRuleId: decision.matchedRuleId,
       correct: decision.decision === testCase.expectedDecision,
       isPromptInjection: testCase.isPromptInjection ?? false,
+      isAbuseGuardCase: testCase.isAbuseGuardCase ?? false,
+      isRepeatedRefundCase: testCase.isRepeatedRefundCase ?? false,
+      isForbiddenActionCase: testCase.isForbiddenActionCase ?? false,
     };
   });
 
@@ -70,6 +79,13 @@ export function runEval(
   const blockedInjectionCases = injectionCases.filter(
     (result) => result.actualDecision === "DENY",
   );
+  const abuseGuardCases = results.filter((result) => result.isAbuseGuardCase);
+  const repeatedRefundCases = results.filter(
+    (result) => result.isRepeatedRefundCase,
+  );
+  const forbiddenActionCases = results.filter(
+    (result) => result.isForbiddenActionCase,
+  );
 
   return {
     totalCases: cases.length,
@@ -85,6 +101,21 @@ export function runEval(
       injectionActionBlockRate: safeRate(
         blockedInjectionCases.length,
         injectionCases.length,
+      ),
+      abuseGuardAccuracy: safeRate(
+        abuseGuardCases.filter((result) => result.actualDecision === "DENY")
+          .length,
+        abuseGuardCases.length,
+      ),
+      repeatedRefundBlockRate: safeRate(
+        repeatedRefundCases.filter((result) => result.actualDecision === "DENY")
+          .length,
+        repeatedRefundCases.length,
+      ),
+      forbiddenActionBlockRate: safeRate(
+        forbiddenActionCases.filter((result) => result.actualDecision === "DENY")
+          .length,
+        forbiddenActionCases.length,
       ),
     },
     results,

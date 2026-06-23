@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { ApprovalPanel } from "@/components/ApprovalPanel";
+import { ArchitectureNotes } from "@/components/ArchitectureNotes";
 import { AuditTimeline } from "@/components/AuditTimeline";
 import { DecisionCard } from "@/components/DecisionCard";
 import { EvalDashboard } from "@/components/EvalDashboard";
@@ -13,16 +15,31 @@ import { toolPresets, type ToolPreset } from "@/lib/demo/simulatedTools";
 import { decide } from "@/lib/policy-engine/decide";
 import type { AuditEvent } from "@/lib/schemas/audit";
 import type { DecisionResult, Policy } from "@/lib/schemas/policy";
-import { ToolCallSchema, type ToolCall, type ToolCallInput } from "@/lib/schemas/toolCall";
+import {
+  ToolCallSchema,
+  type ToolCall,
+  type ToolCallInput,
+} from "@/lib/schemas/toolCall";
 
 const initialPreset = toolPresets[0];
 const initialDecision = decide(initialPreset.toolCall, defaultPolicy);
+const initialToolCall = ToolCallSchema.parse(initialPreset.toolCall);
+type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | null;
 
 export default function Home() {
   const [sopText, setSopText] = useState(defaultSop);
   const [policy, setPolicy] = useState<Policy>(defaultPolicy);
   const [selectedPresetId, setSelectedPresetId] = useState(initialPreset.id);
   const [decision, setDecision] = useState<DecisionResult>(initialDecision);
+  const [currentToolCall, setCurrentToolCall] =
+    useState<ToolCall>(initialToolCall);
+  const [executed, setExecuted] = useState(initialDecision.decision === "ALLOW");
+  const [approvalStatus, setApprovalStatus] = useState<ApprovalStatus>(
+    initialDecision.decision === "APPROVAL" ? "PENDING" : null,
+  );
+  const [highlightedSopLines, setHighlightedSopLines] = useState<number[]>(
+    initialDecision.sourceSopLines,
+  );
   const [auditEvents, setAuditEvents] = useState<AuditEvent[]>([]);
   const [naturalRequest, setNaturalRequest] = useState(
     "Refund order ord_syn_1002 for $125 because the item arrived damaged.",
@@ -38,6 +55,9 @@ export default function Home() {
   function recordDecision(toolCallInput: ToolCallInput, sourceId: string) {
     const nextDecision = decide(toolCallInput, policy);
     const parsedToolCall = ToolCallSchema.parse(toolCallInput);
+    const nextExecuted = nextDecision.decision === "ALLOW";
+    const nextApprovalStatus: ApprovalStatus =
+      nextDecision.decision === "APPROVAL" ? "PENDING" : null;
     const event: AuditEvent = {
       id: `audit_${Date.now()}_${sourceId}`,
       timestamp: new Date().toISOString(),
@@ -50,9 +70,15 @@ export default function Home() {
       reason: nextDecision.reason,
       sourceSopLines: nextDecision.sourceSopLines,
       containsPromptInjection: nextDecision.containsPromptInjection,
+      approvalStatus: nextApprovalStatus,
+      executed: nextExecuted,
     };
 
     setDecision(nextDecision);
+    setCurrentToolCall(parsedToolCall);
+    setExecuted(nextExecuted);
+    setApprovalStatus(nextApprovalStatus);
+    setHighlightedSopLines(nextDecision.sourceSopLines);
     setAuditEvents((events) => [event, ...events].slice(0, 8));
   }
 
@@ -127,24 +153,57 @@ export default function Home() {
     }
   }
 
+  function appendApprovalAuditEvent(nextStatus: Exclude<ApprovalStatus, null>) {
+    const nextExecuted = nextStatus === "APPROVED";
+    const event: AuditEvent = {
+      id: `audit_${Date.now()}_approval_${nextStatus.toLowerCase()}`,
+      timestamp: new Date().toISOString(),
+      toolCall: currentToolCall,
+      decision: decision.decision,
+      matchedRuleId: decision.matchedRuleId,
+      reason:
+        nextStatus === "APPROVED"
+          ? "Synthetic human approval granted."
+          : "Synthetic human approval rejected.",
+      sourceSopLines: decision.sourceSopLines,
+      containsPromptInjection: decision.containsPromptInjection,
+      approvalStatus: nextStatus,
+      executed: nextExecuted,
+    };
+
+    setApprovalStatus(nextStatus);
+    setExecuted(nextExecuted);
+    setAuditEvents((events) => [event, ...events].slice(0, 8));
+  }
+
+  function handleSourceLineClick(line: number) {
+    setHighlightedSopLines([line]);
+  }
+
   return (
     <main className="min-h-screen px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="mb-6 border-b border-slate-200 pb-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <header className="mb-6 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="text-sm font-semibold uppercase tracking-wide text-cyan-700">
-                PolicyGate Phase 2
+              <p className="text-sm font-semibold uppercase text-cyan-700">
+                PolicyGate Phase 4
               </p>
-              <h1 className="mt-1 text-3xl font-bold tracking-normal text-slate-950">
-                Deterministic Permission Gateway
+              <h1 className="mt-2 max-w-3xl text-3xl font-bold text-slate-950 sm:text-4xl">
+                Prompts are suggestions a model can ignore. PolicyGate is
+                enforcement a model cannot.
               </h1>
             </div>
-            <p className="max-w-2xl text-sm leading-6 text-slate-600">
-              Runtime policy decisions are made by TypeScript rules before tool
-              execution. OpenAI only compiles SOPs and extracts candidate
-              actions.
-            </p>
+            <div className="max-w-xl space-y-2 text-sm leading-6 text-slate-600">
+              <p>
+                PolicyGate compiles written SOPs into deterministic runtime
+                policies and gates AI agent tool calls before execution.
+              </p>
+              <p className="font-semibold text-slate-950">
+                Small refunds are only auto approved when they are low value and
+                low risk.
+              </p>
+            </div>
           </div>
         </header>
 
@@ -154,6 +213,8 @@ export default function Home() {
             onChange={setSopText}
             onCompile={compileSop}
             onResetPolicy={resetPolicy}
+            onLineSelect={handleSourceLineClick}
+            highlightedLines={highlightedSopLines}
             isCompiling={isCompiling}
             error={compileError}
           />
@@ -172,12 +233,33 @@ export default function Home() {
             isExtracting={isExtracting}
             error={extractError}
           />
-          <DecisionCard decision={decision} />
+          <div className="space-y-4">
+            <DecisionCard
+              decision={decision}
+              toolCall={currentToolCall}
+              executed={executed}
+              approvalStatus={approvalStatus}
+              onSourceLineClick={handleSourceLineClick}
+            />
+            <ApprovalPanel
+              visible={decision.decision === "APPROVAL"}
+              approvalStatus={approvalStatus}
+              onApprove={() => appendApprovalAuditEvent("APPROVED")}
+              onReject={() => appendApprovalAuditEvent("REJECTED")}
+            />
+          </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[0.85fr_1.15fr]">
-          <AuditTimeline events={auditEvents} />
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[0.95fr_1.05fr]">
+          <AuditTimeline
+            events={auditEvents}
+            onSourceLineClick={handleSourceLineClick}
+          />
           <EvalDashboard />
+        </div>
+
+        <div className="mt-4">
+          <ArchitectureNotes />
         </div>
       </div>
     </main>

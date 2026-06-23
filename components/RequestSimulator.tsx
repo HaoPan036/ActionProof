@@ -30,15 +30,15 @@ export function RequestSimulator({
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-600">
-          Request Simulator
+        <h2 className="text-sm font-semibold uppercase text-slate-600">
+          Agent Request Simulator
         </h2>
         <span className="text-xs text-slate-500">Preset or OpenAI extract</span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <div>
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <h3 className="mb-2 text-xs font-semibold uppercase text-slate-500">
             Mode A: Preset Tool Calls
           </h3>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-1">
@@ -65,14 +65,14 @@ export function RequestSimulator({
         </div>
 
         <div>
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <h3 className="mb-2 text-xs font-semibold uppercase text-slate-500">
             Mode B: Natural Language Request
           </h3>
           <textarea
             value={naturalRequest}
             onChange={(event) => onNaturalRequestChange(event.target.value)}
             className="min-h-36 w-full resize-y rounded-md border border-slate-200 bg-slate-50 p-3 text-sm leading-6 text-slate-800 outline-none transition focus:border-cyan-500 focus:bg-white focus:ring-2 focus:ring-cyan-100"
-            placeholder="Refund order ord_syn_1002 for $125 because the item arrived damaged."
+            placeholder="Refund order ord_syn_1004 for $30. No evidence was provided and this customer has recent refund activity."
           />
           <button
             type="button"

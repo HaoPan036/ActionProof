@@ -31,6 +31,13 @@ export const CONDITION_FIELDS = [
   "reason_category",
   "contains_prompt_injection",
   "action_count",
+  "risk_level",
+  "evidence_provided",
+  "has_delivery_issue",
+  "refund_count_30d",
+  "refund_amount_30d",
+  "account_age_days",
+  "same_address_refund_count_30d",
 ] as const;
 
 const actionSet = new Set<string>(ACTIONS);

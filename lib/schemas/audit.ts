@@ -11,6 +11,8 @@ export const AuditEventSchema = z.object({
   reason: z.string(),
   sourceSopLines: z.array(z.number().int().positive()),
   containsPromptInjection: z.boolean(),
+  approvalStatus: z.enum(["PENDING", "APPROVED", "REJECTED"]).nullable().optional(),
+  executed: z.boolean().optional(),
 });
 
 export type AuditEvent = z.infer<typeof AuditEventSchema>;

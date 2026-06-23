@@ -65,6 +65,14 @@ describe("OpenAI helper validation", () => {
         customerId: null,
         orderId: "ord_syn_1002",
         rawUserRequest: "Refund order ord_syn_1002 for $125.",
+        riskLevel: "LOW",
+        riskSignals: ["amount requires approval"],
+        evidenceProvided: true,
+        hasDeliveryIssue: true,
+        refundCount30d: 1,
+        refundAmount30d: 30,
+        accountAgeDays: 120,
+        sameAddressRefundCount30d: 0,
       },
       "Refund order ord_syn_1002 for $125.",
     );
@@ -73,6 +81,8 @@ describe("OpenAI helper validation", () => {
     expect(toolCall.action).toBe("refund_order");
     expect(toolCall.amount).toBe(125);
     expect(toolCall.orderId).toBe("ord_syn_1002");
+    expect(toolCall.riskLevel).toBe("LOW");
+    expect(toolCall.riskSignals).toContain("amount requires approval");
     expect(toolCall.contains_prompt_injection).toBe(false);
     expect("decision" in toolCall).toBe(false);
   });

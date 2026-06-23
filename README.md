@@ -3,6 +3,7 @@
 PolicyGate is a runtime permission gateway for AI agents. It compiles written SOPs into deterministic policies and enforces those policies before any tool execution.
 
 Phase 1 builds the deterministic foundation. Phase 2 adds OpenAI structured extraction for SOP compilation and candidate action extraction. Phase 3 adds an isolated stdio MCP server with gated tools for a synthetic commerce demo. The app does not connect to real company systems.
+Phase 4 polishes the demo flow with SOP traceability, approval handling, an audit timeline, and a deterministic Refund Abuse Guard.
 
 ## Why prompt guardrails are insufficient
 
@@ -31,6 +32,16 @@ The policy engine validates a tool call and a policy with Zod, checks policy rul
 - `DENY`
 
 If no policy rule matches, the engine returns `DENY`. The default policy denies unmatched actions.
+
+## Refund Abuse Guard
+
+Small refunds are only auto approved when they are both low value and low risk. A $30 refund can be allowed when the request has evidence, a delivery issue, and no suspicious refund history.
+
+Small refunds with MEDIUM or HIGH risk are routed to human approval. Repeated refund patterns are blocked by deterministic rules, not by model judgment:
+
+- 5 or more refund requests in the last 30 days means `DENY`.
+- More than $200 refunded in the last 30 days means `DENY`.
+- 10 or more refunds to the same shipping address in the last 30 days means `DENY`.
 
 ## OpenAI setup
 
@@ -66,6 +77,20 @@ Use preset buttons to run the deterministic demo without OpenAI. With `OPENAI_AP
 - `Extract Action` to turn a natural language request into a candidate `ToolCall`.
 
 Final decisions still come only from `decide(toolCall, policy)`.
+
+## Demo Flow
+
+1. Compile SOP.
+2. Run `Allow refund 30, low risk`.
+3. Run `Suspicious small refund 30`.
+4. Approve or reject the approval-required request.
+5. Run `Deny repeated refund abuse`.
+6. Run `Attack refund 5000`.
+7. Run `Deny data export`.
+8. Click a SOP source line in the decision card.
+9. Review the eval dashboard.
+
+The full preset flow is designed to fit in a short hackathon demo recording.
 
 ## MCP demo
 
@@ -109,6 +134,10 @@ npx vitest run
 ```bash
 npm run build
 ```
+
+## Screenshots
+
+Use `public/demo-screenshots/` for lightweight pitch or Devpost screenshots. Do not commit large media files.
 
 ## Roadmap
 

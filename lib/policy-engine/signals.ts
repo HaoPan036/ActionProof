@@ -1,3 +1,4 @@
+import type { ConditionField } from "@/lib/schemas/policy";
 import type { ToolCall } from "@/lib/schemas/toolCall";
 
 const PROMPT_INJECTION_PATTERNS = [
@@ -35,16 +36,24 @@ export function enrichToolCallSignals(toolCall: ToolCall): ToolCall {
 
 export function getSignalValue(
   toolCall: ToolCall,
-  field: keyof Pick<
-    ToolCall,
-    | "amount"
-    | "refund_count"
-    | "customer_data_type"
-    | "customer_tier"
-    | "reason_category"
-    | "contains_prompt_injection"
-    | "action_count"
-  >,
+  field: ConditionField,
 ) {
-  return toolCall[field];
+  const fieldMap: Record<ConditionField, keyof ToolCall> = {
+    amount: "amount",
+    refund_count: "refund_count",
+    customer_data_type: "customer_data_type",
+    customer_tier: "customer_tier",
+    reason_category: "reason_category",
+    contains_prompt_injection: "contains_prompt_injection",
+    action_count: "action_count",
+    risk_level: "riskLevel",
+    evidence_provided: "evidenceProvided",
+    has_delivery_issue: "hasDeliveryIssue",
+    refund_count_30d: "refundCount30d",
+    refund_amount_30d: "refundAmount30d",
+    account_age_days: "accountAgeDays",
+    same_address_refund_count_30d: "sameAddressRefundCount30d",
+  };
+
+  return toolCall[fieldMap[field]];
 }
