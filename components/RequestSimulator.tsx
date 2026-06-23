@@ -33,7 +33,9 @@ export function RequestSimulator({
         <h2 className="text-sm font-semibold uppercase text-slate-600">
           Agent Request Simulator
         </h2>
-        <span className="text-xs text-slate-500">Preset or OpenAI extract</span>
+        <span className="text-xs text-slate-500">
+          AI extracts; PolicyGate decides
+        </span>
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">

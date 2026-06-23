@@ -23,6 +23,8 @@ The model may also surface signals such as a possible prompt injection attempt. 
 
 The model never returns `ALLOW`, `APPROVAL`, or `DENY` for a runtime request.
 
+AI extracts candidate actions and risk signals. PolicyGate enforces the final decision with deterministic code.
+
 ## What the deterministic engine does
 
 The policy engine validates a tool call and a policy with Zod, checks policy rules by ascending priority, and returns one of:
@@ -134,6 +136,14 @@ npx vitest run
 ```bash
 npm run build
 ```
+
+## Deployment
+
+For Vercel, set `OPENAI_API_KEY` in Project Settings -> Environment Variables.
+
+Do not expose API keys to the browser. PolicyGate reads `OPENAI_API_KEY` only from server-side API routes.
+
+The preset deterministic demo works without OpenAI. The OpenAI SOP compiler and natural language extraction demo require `OPENAI_API_KEY`.
 
 ## Screenshots
 

@@ -109,6 +109,7 @@ export async function compilePolicyFromSop(sopText: string): Promise<Policy> {
           "- Every rule must include sourceSopLines and a human readable reason.",
           "- Actions must be from the allowed enum only.",
           "- Decisions must be ALLOW, APPROVAL, or DENY only.",
+          "- When SOP text explicitly says automatically approved or auto approved, use ALLOW for that matching rule.",
           "- If SOP language is ambiguous, choose DENY or APPROVAL instead of ALLOW.",
           "- Do not create ALLOW rules for export_customer_data, bulk_refund, or modify_policy in this demo.",
           "- Use all conditions for conjunctive checks and any conditions for alternatives.",

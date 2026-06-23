@@ -199,6 +199,10 @@ export default function Home() {
                 PolicyGate compiles written SOPs into deterministic runtime
                 policies and gates AI agent tool calls before execution.
               </p>
+              <p>
+                AI extracts candidate actions and risk signals. PolicyGate
+                enforces the final decision with deterministic code.
+              </p>
               <p className="font-semibold text-slate-950">
                 Small refunds are only auto approved when they are low value and
                 low risk.
