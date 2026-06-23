@@ -1,4 +1,3 @@
-import { runEval } from "@/lib/eval/runEval";
 import type { ToolPreset } from "@/lib/demo/simulatedTools";
 import type { DecisionResult } from "@/lib/schemas/policy";
 import type { ToolCall } from "@/lib/schemas/toolCall";
@@ -27,15 +26,15 @@ const presentationScenarioIds = [
 ];
 
 const decisionBadgeStyles = {
-  ALLOW: "border-emerald-600 bg-emerald-50 text-emerald-600",
-  APPROVAL: "border-amber-500 bg-amber-50 text-amber-500",
-  DENY: "border-rose-600 bg-rose-50 text-rose-600",
+  ALLOW: "border-emerald-600 text-emerald-600",
+  APPROVAL: "border-amber-500 text-amber-500",
+  DENY: "border-rose-600 text-rose-600",
 } satisfies Record<DecisionResult["decision"], string>;
 
 const decisionSoftStyles = {
-  ALLOW: "bg-emerald-50 text-emerald-600",
-  APPROVAL: "bg-amber-50 text-amber-500",
-  DENY: "bg-rose-50 text-rose-600",
+  ALLOW: "border-emerald-600 text-emerald-600",
+  APPROVAL: "border-amber-500 text-amber-500",
+  DENY: "border-rose-600 text-rose-600",
 } satisfies Record<DecisionResult["decision"], string>;
 
 const decisionTextStyles = {
@@ -45,6 +44,12 @@ const decisionTextStyles = {
 } satisfies Record<DecisionResult["decision"], string>;
 
 const decisionTitle = {
+  ALLOW: "Allow",
+  APPROVAL: "Approval",
+  DENY: "Deny",
+} satisfies Record<DecisionResult["decision"], string>;
+
+const spotlightDecisionTitle = {
   ALLOW: "Allowed",
   APPROVAL: "Approval",
   DENY: "Denied",
@@ -76,10 +81,6 @@ const refundMatrix = [
   high: DecisionResult["decision"];
 }>;
 
-function formatPercent(value: number): string {
-  return `${Math.round(value * 100)}%`;
-}
-
 function executionLabel(
   decision: DecisionResult,
   executed: boolean,
@@ -101,23 +102,7 @@ function executionLabel(
     return "Approval required, not executed";
   }
 
-  return "Denied before execution";
-}
-
-function displayValue(value: unknown): string {
-  if (value === null || value === undefined || value === "") {
-    return "Not provided";
-  }
-
-  return String(value);
-}
-
-function displayAmount(value: unknown): string {
-  if (typeof value === "number") {
-    return `$${value}`;
-  }
-
-  return displayValue(value);
+  return "Blocked before execution";
 }
 
 function getSopLineText(sopText: string, line: number): string {
@@ -138,7 +123,7 @@ function MatrixBadge({ decision }: { decision: DecisionResult["decision"] }) {
   return (
     <span
       className={[
-        "inline-flex rounded-2xl border px-3 py-1 text-xs font-semibold",
+        "inline-flex min-w-24 justify-center rounded-2xl border-2 bg-white px-3 py-1 text-xs font-semibold",
         decisionBadgeStyles[decision],
       ].join(" ")}
     >
@@ -148,10 +133,12 @@ function MatrixBadge({ decision }: { decision: DecisionResult["decision"] }) {
 }
 
 function FlowStep({
+  index,
   title,
   subtitle,
   activeDecision,
 }: {
+  index: string;
   title: string;
   subtitle: string;
   activeDecision?: DecisionResult["decision"];
@@ -159,13 +146,16 @@ function FlowStep({
   return (
     <div
       className={[
-        "min-w-0 flex-1 rounded-2xl p-4 text-center",
-        activeDecision ? decisionSoftStyles[activeDecision] : "bg-slate-50",
+        "min-w-[10rem] flex-1 rounded-2xl p-4 text-center",
+        activeDecision
+          ? `border-2 bg-white ${decisionSoftStyles[activeDecision]}`
+          : "bg-slate-50",
       ].join(" ")}
     >
+      <div className="font-mono text-xs text-slate-400">{index}</div>
       <div
         className={[
-          "text-sm font-semibold",
+          "mt-2 text-sm font-semibold",
           activeDecision ? decisionTextStyles[activeDecision] : "text-slate-900",
         ].join(" ")}
       >
@@ -195,7 +185,6 @@ export function PresentationMode({
   onRunPreset,
   onSourceLineClick,
 }: PresentationModeProps) {
-  const report = runEval();
   const scenarioPresets = presentationScenarioIds
     .map((id) => presets.find((preset) => preset.id === id))
     .filter((preset): preset is ToolPreset => Boolean(preset));
@@ -204,12 +193,9 @@ export function PresentationMode({
   const proofText = primarySourceLine
     ? getSopLineText(sopText, primarySourceLine)
     : "Default fail safe DENY";
-  const metrics = [
-    [`${report.totalCases}`, "Deterministic cases"],
-    [formatPercent(report.metrics.policyDecisionAccuracy), "Decision accuracy"],
-    [formatPercent(report.metrics.falseAllowRate), "False allow rate"],
-    [formatPercent(report.metrics.abuseGuardAccuracy), "Abuse guard accuracy"],
-  ];
+  const sourceLineLabel = primarySourceLine
+    ? `Line ${primarySourceLine}`
+    : "Default fail safe DENY";
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -222,8 +208,8 @@ export function PresentationMode({
             Live Permission Demo
           </h2>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            Choose a scenario and watch the request move from AI extraction to
-            deterministic enforcement and SOP-linked audit proof.
+            Pick a scenario, then follow request to AI extraction to
+            deterministic enforcement to audit proof.
           </p>
         </div>
         <p className="text-xs uppercase tracking-wide text-slate-400">
@@ -253,137 +239,85 @@ export function PresentationMode({
         })}
       </div>
 
-      <div className="mt-6 flex flex-col gap-2 md:flex-row md:items-stretch">
-        <FlowStep
-          title="User request"
-          subtitle={flowRequestLabel(toolCall, scenarioLabel)}
-        />
-        <div className="hidden items-center text-slate-400 md:flex">{">"}</div>
-        <FlowStep title="AI extracts" subtitle="candidate action" />
-        <div className="hidden items-center text-slate-400 md:flex">{">"}</div>
-        <FlowStep title="PolicyGate" subtitle="deterministic" />
-        <div className="hidden items-center text-slate-400 md:flex">{">"}</div>
-        <FlowStep
-          title="Decision"
-          subtitle={decisionTitle[decision.decision]}
-          activeDecision={decision.decision}
-        />
-        <div className="hidden items-center text-slate-400 md:flex">{">"}</div>
-        <FlowStep title="Audit proof" subtitle="SOP linked" />
+      <div className="mt-6 overflow-x-auto">
+        <div className="flex min-w-[56rem] items-stretch gap-3">
+          <FlowStep
+            index="01"
+            title="User request"
+            subtitle={flowRequestLabel(toolCall, scenarioLabel)}
+          />
+          <div className="flex items-center text-slate-400">{">"}</div>
+          <FlowStep index="02" title="AI extracts" subtitle="candidate action" />
+          <div className="flex items-center text-slate-400">{">"}</div>
+          <FlowStep index="03" title="PolicyGate" subtitle="deterministic" />
+          <div className="flex items-center text-slate-400">{">"}</div>
+          <FlowStep
+            index="04"
+            title="Decision"
+            subtitle={spotlightDecisionTitle[decision.decision]}
+            activeDecision={decision.decision}
+          />
+          <div className="flex items-center text-slate-400">{">"}</div>
+          <FlowStep index="05" title="Audit proof" subtitle="SOP linked" />
+        </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-        <div className="rounded-2xl bg-slate-50 p-6">
-          <p className="text-xs text-slate-400">
-            Scenario · {scenarioLabel}
-          </p>
-          <div className="mt-4 flex flex-wrap items-center gap-4">
-            <span
-              className={[
-                "inline-flex rounded-2xl border-2 px-5 py-3 text-5xl font-semibold leading-none tracking-tight",
-                decisionBadgeStyles[decision.decision],
-              ].join(" ")}
-            >
-              {decisionTitle[decision.decision]}
-            </span>
-            <span className="text-xl font-semibold text-slate-900">
-              {execution}
-            </span>
-          </div>
-
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <div className="text-xs text-slate-400">Action</div>
-              <div className="mt-2 font-mono text-xs text-slate-900">
-                {toolCall?.action ?? "unknown"}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Amount</div>
-              <div className="mt-2 text-sm font-semibold text-slate-900">
-                {displayAmount(toolCall?.amount)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Matched rule</div>
-              <div className="mt-2 break-all font-mono text-xs text-slate-900">
-                {decision.matchedRuleId ?? "default-deny"}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Executed</div>
-              <div className="mt-2 font-mono text-xs text-slate-900">
-                {String(executed)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Risk level</div>
-              <div className="mt-2 text-sm text-slate-600">
-                {displayValue(toolCall?.riskLevel)}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-slate-400">Risk signals</div>
-              <div className="mt-2 text-sm text-slate-600">
-                {toolCall?.riskSignals?.length
-                  ? toolCall.riskSignals.join(", ")
-                  : "None"}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <div className="text-xs text-slate-400">Reason</div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {decision.reason}
-            </p>
-          </div>
+      <div className="mt-6 rounded-2xl bg-slate-50 p-6">
+        <p className="text-sm font-semibold text-slate-600">
+          Scenario · {scenarioLabel}
+        </p>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <span
+            className={[
+              "inline-flex rounded-2xl border-2 bg-white px-5 py-3 text-5xl font-semibold leading-none tracking-tight",
+              decisionBadgeStyles[decision.decision],
+            ].join(" ")}
+          >
+            {spotlightDecisionTitle[decision.decision]}
+          </span>
+          <span className="text-xl font-semibold text-slate-900">
+            {execution}
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
-          <div className="rounded-2xl bg-slate-50 p-6">
-            <h3 className="text-xl font-semibold text-slate-900">
-              Audit proof
-            </h3>
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <div className="text-xs text-slate-400">Matched rule</div>
+            <div className="mt-2 break-all font-mono text-xs text-slate-900">
+              {decision.matchedRuleId ?? "default-deny"}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-400">Source SOP line</div>
             {primarySourceLine ? (
-              <>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  This decision is backed by SOP line {primarySourceLine}.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => onSourceLineClick(primarySourceLine)}
-                  className="mt-4 w-full rounded-2xl bg-white p-4 text-left text-sm text-slate-600 transition hover:text-indigo-600"
-                >
-                  <span className="font-mono text-xs text-indigo-600">
-                    Line {primarySourceLine}
-                  </span>
-                  <span className="mt-1 block leading-6">{proofText}</span>
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => onSourceLineClick(primarySourceLine)}
+                className="mt-2 text-left text-sm font-semibold text-indigo-600 transition hover:text-slate-900"
+              >
+                {sourceLineLabel}
+              </button>
             ) : (
-              <p className="mt-4 rounded-2xl bg-white p-4 text-sm text-slate-600">
-                Default fail safe DENY
-              </p>
+              <div className="mt-2 text-sm font-semibold text-slate-900">
+                {sourceLineLabel}
+              </div>
             )}
           </div>
-
-          <div className="rounded-2xl bg-slate-50 p-6">
-            <h3 className="text-xl font-semibold text-slate-900">
-              Eval proof
-            </h3>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-              {metrics.map(([value, label]) => (
-                <div key={label} className="rounded-2xl bg-white p-4">
-                  <div className="text-2xl font-semibold text-slate-900">
-                    {value}
-                  </div>
-                  <div className="mt-2 text-xs text-slate-400">{label}</div>
-                </div>
-              ))}
+          <div>
+            <div className="text-xs text-slate-400">Reason</div>
+            <div className="mt-2 text-sm leading-6 text-slate-600">
+              {decision.reason}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-slate-400">Executed</div>
+            <div className="mt-2 font-mono text-xs text-slate-900">
+              {String(executed)}
             </div>
           </div>
         </div>
+
+        <div className="mt-6 text-xs text-slate-400">{proofText}</div>
       </div>
 
       <div className="mt-6 overflow-x-auto rounded-2xl bg-slate-50 p-6">
