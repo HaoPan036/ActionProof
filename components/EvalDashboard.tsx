@@ -26,16 +26,14 @@ function MetricRows({
   labels: Record<string, string>;
 }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {Object.entries(labels).map(([key, label]) => (
         <div
           key={key}
-          className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3"
+          className="rounded-2xl bg-slate-50 p-4"
         >
-          <div className="min-w-0 text-sm leading-5 text-slate-600">
-            {label}
-          </div>
-          <div className="whitespace-nowrap text-right text-lg font-semibold leading-none text-slate-900 tabular-nums">
+          <div className="text-sm leading-5 text-slate-600">{label}</div>
+          <div className="mt-2 whitespace-nowrap text-2xl font-semibold leading-none text-slate-900 tabular-nums">
             {formatPercent(metrics[key] ?? 0)}
           </div>
         </div>
@@ -46,23 +44,20 @@ function MetricRows({
 
 function LlmMetricRows() {
   const rows = [
-    "Action extraction accuracy",
-    "Amount extraction accuracy",
-    "Risk extraction accuracy",
+    ["Action extraction", "Demoed live"],
+    ["Amount extraction", "Demoed live"],
+    ["Risk extraction", "Demoed live"],
   ];
 
   return (
-    <div className="mt-3 space-y-2">
-      {rows.map((label) => (
-        <div
-          key={label}
-          className="flex items-center justify-between gap-3 rounded-2xl bg-white px-4 py-3"
-        >
-          <div className="min-w-0 text-sm leading-5 text-slate-600">
+    <div className="mt-6 space-y-3">
+      {rows.map(([label, value]) => (
+        <div key={label} className="rounded-2xl bg-slate-50 p-4">
+          <div className="text-sm leading-5 text-slate-600">
             {label}
           </div>
-          <div className="whitespace-nowrap text-right text-sm leading-none text-slate-400 tabular-nums">
-            Not run
+          <div className="mt-2 text-sm font-semibold leading-none text-slate-900">
+            {value}
           </div>
         </div>
       ))}
@@ -121,30 +116,35 @@ export function EvalDashboard() {
           </div>
         ))}
       </div>
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="rounded-2xl bg-slate-50 p-6">
-          <h3 className="text-xl font-semibold text-slate-900">
-            LLM Extraction Layer
-          </h3>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            LLM extraction is demonstrated live through the request simulator.
-            Deterministic enforcement is evaluated below.
-          </p>
-          <LlmMetricRows />
+      <details className="mt-6 rounded-2xl bg-slate-50 p-6">
+        <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+          View detailed evaluation layers
+        </summary>
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="rounded-2xl bg-white p-6">
+            <h3 className="text-xl font-semibold text-slate-900">
+              LLM Extraction Layer
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              LLM extraction is shown live in the request simulator.
+              Deterministic enforcement is evaluated below.
+            </p>
+            <LlmMetricRows />
+          </div>
+          <div className="rounded-2xl bg-white p-6">
+            <h3 className="mb-6 text-xl font-semibold text-slate-900">
+              Deterministic Engine Layer
+            </h3>
+            <MetricRows metrics={report.metrics} labels={engineMetricLabels} />
+          </div>
+          <div className="rounded-2xl bg-white p-6">
+            <h3 className="mb-6 text-xl font-semibold text-slate-900">
+              Safety and Abuse Guard Layer
+            </h3>
+            <MetricRows metrics={report.metrics} labels={safetyMetricLabels} />
+          </div>
         </div>
-        <div className="rounded-2xl bg-slate-50 p-6">
-          <h3 className="mb-4 text-xl font-semibold text-slate-900">
-            Deterministic Engine Layer
-          </h3>
-          <MetricRows metrics={report.metrics} labels={engineMetricLabels} />
-        </div>
-        <div className="rounded-2xl bg-slate-50 p-6">
-          <h3 className="mb-4 text-xl font-semibold text-slate-900">
-            Safety and Abuse Guard Layer
-          </h3>
-          <MetricRows metrics={report.metrics} labels={safetyMetricLabels} />
-        </div>
-      </div>
+      </details>
     </div>
   );
 }
