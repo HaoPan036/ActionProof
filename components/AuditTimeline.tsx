@@ -9,9 +9,9 @@ type AuditTimelineProps = {
 type AuditFilter = "All" | "Allowed" | "Approval" | "Denied" | "Abuse Guard";
 
 const decisionBadgeStyles = {
-  ALLOW: "border-emerald-600 text-emerald-600",
-  APPROVAL: "border-amber-500 text-amber-500",
-  DENY: "border-rose-600 text-rose-600",
+  ALLOW: "bg-emerald-50 text-emerald-700",
+  APPROVAL: "bg-amber-50 text-amber-700",
+  DENY: "bg-rose-50 text-rose-700",
 } satisfies Record<AuditEvent["decision"], string>;
 
 const filters: AuditFilter[] = [
@@ -92,9 +92,9 @@ export function AuditTimeline({ events, onSourceLineClick }: AuditTimelineProps)
               type="button"
               onClick={() => setFilter(item)}
               className={[
-                "rounded-2xl px-3 py-2 text-xs uppercase tracking-wide transition",
+                "rounded-xl px-3 py-2 text-xs uppercase tracking-wide transition hover:-translate-y-px active:scale-[0.98]",
                 filter === item
-                  ? "bg-indigo-600 text-slate-50"
+                  ? "bg-indigo-600 text-slate-50 shadow-sm"
                   : "bg-slate-50 text-slate-600 hover:text-indigo-600",
               ].join(" ")}
             >
@@ -115,7 +115,7 @@ export function AuditTimeline({ events, onSourceLineClick }: AuditTimelineProps)
                 <div className="flex flex-wrap items-center gap-3 text-sm">
                   <span
                     className={[
-                      "rounded-2xl border-2 bg-white px-3 py-2 text-xs font-semibold",
+                      "rounded-lg px-3 py-2 text-xs font-semibold",
                       decisionBadgeStyles[event.decision],
                     ].join(" ")}
                   >
@@ -127,11 +127,11 @@ export function AuditTimeline({ events, onSourceLineClick }: AuditTimelineProps)
                   <span className="text-xs text-slate-400">
                     {new Date(event.timestamp).toLocaleTimeString()}
                   </span>
-                  <span className="rounded-2xl bg-white px-3 py-2 font-mono text-xs text-slate-600">
+                  <span className="rounded-lg bg-white px-3 py-2 font-mono text-xs text-slate-600">
                     executed={String(event.executed ?? false)}
                   </span>
                   {event.approvalStatus ? (
-                    <span className="rounded-2xl bg-white px-3 py-2 font-mono text-xs text-slate-600">
+                    <span className="rounded-lg bg-white px-3 py-2 font-mono text-xs text-slate-600">
                       approval={event.approvalStatus}
                     </span>
                   ) : null}
@@ -154,7 +154,7 @@ export function AuditTimeline({ events, onSourceLineClick }: AuditTimelineProps)
                       key={line}
                       type="button"
                       onClick={() => onSourceLineClick(line)}
-                      className="rounded-2xl bg-white px-3 py-2 font-mono text-xs text-indigo-600 transition hover:text-slate-900"
+                      className="rounded-lg bg-white px-3 py-2 font-mono text-xs text-indigo-600 transition hover:-translate-y-px hover:text-slate-900 active:scale-[0.98]"
                     >
                       SOP {line}
                     </button>

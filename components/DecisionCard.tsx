@@ -12,9 +12,9 @@ type DecisionCardProps = {
 };
 
 const decisionStyles = {
-  ALLOW: "border-emerald-600 text-emerald-600",
-  APPROVAL: "border-amber-500 text-amber-500",
-  DENY: "border-rose-600 text-rose-600",
+  ALLOW: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+  APPROVAL: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+  DENY: "bg-rose-50 text-rose-700 ring-1 ring-rose-200",
 } satisfies Record<DecisionResult["decision"], string>;
 
 function executionLabel(
@@ -109,7 +109,7 @@ export function DecisionCard({
   ];
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-100">
       <div>
         <div className="mb-4 flex items-center justify-between gap-3">
           <h2 className="text-xl font-semibold text-slate-900">
@@ -121,7 +121,7 @@ export function DecisionCard({
         </div>
         <span
           className={[
-            "inline-flex rounded-2xl border-2 bg-white px-5 py-4 text-5xl font-semibold leading-none tracking-tight",
+            "inline-flex rounded-xl px-5 py-4 text-5xl font-semibold leading-none tracking-tight",
             decisionStyles[decision.decision],
           ].join(" ")}
         >
@@ -147,7 +147,7 @@ export function DecisionCard({
                 key={line}
                 type="button"
                 onClick={() => onSourceLineClick(line)}
-                className="rounded-2xl bg-white px-3 py-2 font-mono text-xs text-indigo-600 transition hover:text-slate-900"
+                className="rounded-lg bg-white px-3 py-2 font-mono text-xs text-indigo-600 transition hover:-translate-y-px hover:text-slate-900 active:scale-[0.98]"
               >
                 Line {line}
               </button>
@@ -165,32 +165,9 @@ export function DecisionCard({
             <dt className="text-xs uppercase tracking-wide text-slate-400">
               {label}
             </dt>
-            <dd className="text-sm text-slate-600">{value}</dd>
+            <dd className="text-sm text-slate-600 tabular-nums">{value}</dd>
           </div>
         ))}
-        <div>
-          <dt className="px-4 pt-2 text-xs uppercase tracking-wide text-slate-400">
-            Source SOP lines
-          </dt>
-          <dd className="mt-2 flex flex-wrap gap-3 px-4 pb-2">
-            {sourceLines.length > 0 ? (
-              sourceLines.map((line) => (
-                <button
-                  key={line}
-                  type="button"
-                  onClick={() => onSourceLineClick(line)}
-                  className="rounded-2xl bg-slate-50 px-3 py-2 font-mono text-xs text-indigo-600 transition hover:text-slate-900"
-                >
-                  Line {line}
-                </button>
-              ))
-            ) : (
-              <span className="text-sm text-slate-600">
-                Default fail safe DENY
-              </span>
-            )}
-          </dd>
-        </div>
       </dl>
 
       <div className="mt-6 grid grid-cols-1 gap-6">

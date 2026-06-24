@@ -92,9 +92,9 @@ export function RequestSimulator({
                           type="button"
                           onClick={() => onRunPreset(preset)}
                           className={[
-                            "rounded-2xl px-4 py-3 text-left text-sm font-semibold transition",
+                            "rounded-xl px-4 py-3 text-left text-sm font-semibold transition hover:-translate-y-px active:scale-[0.98]",
                             isSelected
-                              ? "bg-indigo-600 text-slate-50"
+                              ? "bg-indigo-600 text-slate-50 shadow-sm"
                               : "bg-white text-slate-600 hover:text-indigo-600",
                           ].join(" ")}
                         >
@@ -121,14 +121,14 @@ export function RequestSimulator({
           <textarea
             value={naturalRequest}
             onChange={(event) => onNaturalRequestChange(event.target.value)}
-            className="mt-4 min-h-36 w-full resize-y rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600 outline-none transition focus:border-indigo-600 focus:bg-white"
+            className="mt-4 min-h-36 w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600 outline-none transition focus:border-indigo-600 focus:bg-white"
             placeholder="Refund order ord_syn_1004 for $30. No evidence was provided and this customer has recent refund activity."
           />
           <button
             type="button"
             onClick={onExtractAction}
             disabled={isExtracting}
-            className="mt-3 rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-slate-50 transition disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-3 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-slate-50 transition hover:-translate-y-px active:scale-[0.98] disabled:cursor-not-allowed disabled:transform-none disabled:opacity-50"
           >
             {isExtracting ? "Extracting..." : "Extract Action"}
           </button>
