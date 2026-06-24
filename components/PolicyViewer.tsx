@@ -13,9 +13,9 @@ const policySummary = [
 ];
 
 const decisionStyles = {
-  ALLOW: "border-emerald-600 text-emerald-600",
-  APPROVAL: "border-amber-500 text-amber-500",
-  DENY: "border-rose-600 text-rose-600",
+  ALLOW: "bg-emerald-50 text-emerald-700",
+  APPROVAL: "bg-amber-50 text-amber-700",
+  DENY: "bg-rose-50 text-rose-700",
 } as const;
 
 export function PolicyViewer({ policy }: PolicyViewerProps) {
@@ -38,7 +38,7 @@ export function PolicyViewer({ policy }: PolicyViewerProps) {
             <span className="text-sm text-slate-600">{label}</span>
             <span
               className={[
-                "rounded-2xl border-2 bg-white px-3 py-2 text-xs font-semibold",
+                "rounded-lg px-3 py-2 text-xs font-semibold",
                 decisionStyles[decision as keyof typeof decisionStyles],
               ].join(" ")}
             >

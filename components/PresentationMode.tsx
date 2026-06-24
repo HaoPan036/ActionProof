@@ -26,21 +26,27 @@ const presentationScenarioIds = [
 ];
 
 const decisionBadgeStyles = {
-  ALLOW: "border-emerald-600 text-emerald-600",
-  APPROVAL: "border-amber-500 text-amber-500",
-  DENY: "border-rose-600 text-rose-600",
+  ALLOW: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200",
+  APPROVAL: "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+  DENY: "bg-rose-50 text-rose-700 ring-1 ring-rose-200",
 } satisfies Record<DecisionResult["decision"], string>;
 
 const decisionSoftStyles = {
-  ALLOW: "border-emerald-600 text-emerald-600",
-  APPROVAL: "border-amber-500 text-amber-500",
-  DENY: "border-rose-600 text-rose-600",
+  ALLOW: "ring-1 ring-emerald-200 bg-emerald-50",
+  APPROVAL: "ring-1 ring-amber-200 bg-amber-50",
+  DENY: "ring-1 ring-rose-200 bg-rose-50",
 } satisfies Record<DecisionResult["decision"], string>;
 
 const decisionTextStyles = {
   ALLOW: "text-emerald-600",
-  APPROVAL: "text-amber-500",
+  APPROVAL: "text-amber-600",
   DENY: "text-rose-600",
+} satisfies Record<DecisionResult["decision"], string>;
+
+const matrixStyles = {
+  ALLOW: "bg-emerald-50 text-emerald-700",
+  APPROVAL: "bg-amber-50 text-amber-700",
+  DENY: "bg-rose-50 text-rose-700",
 } satisfies Record<DecisionResult["decision"], string>;
 
 const decisionTitle = {
@@ -123,8 +129,8 @@ function MatrixBadge({ decision }: { decision: DecisionResult["decision"] }) {
   return (
     <span
       className={[
-        "inline-flex min-w-24 justify-center rounded-2xl border-2 bg-white px-3 py-1 text-xs font-semibold",
-        decisionBadgeStyles[decision],
+        "inline-flex min-w-24 justify-center rounded-lg px-3 py-1 text-xs font-semibold",
+        matrixStyles[decision],
       ].join(" ")}
     >
       {decisionTitle[decision]}
@@ -147,9 +153,7 @@ function FlowStep({
     <div
       className={[
         "min-w-[10rem] flex-1 rounded-2xl p-4 text-center",
-        activeDecision
-          ? `border-2 bg-white ${decisionSoftStyles[activeDecision]}`
-          : "bg-slate-50",
+        activeDecision ? decisionSoftStyles[activeDecision] : "bg-slate-50",
       ].join(" ")}
     >
       <div className="font-mono text-xs text-slate-400">{index}</div>
@@ -198,7 +202,7 @@ export function PresentationMode({
     : "Default fail safe DENY";
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl bg-white p-6 shadow-md ring-1 ring-slate-100">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-slate-400">
@@ -227,9 +231,9 @@ export function PresentationMode({
               type="button"
               onClick={() => onRunPreset(preset)}
               className={[
-                "rounded-2xl px-4 py-3 text-left text-sm font-semibold transition",
+                "rounded-xl px-4 py-3 text-left text-sm font-semibold transition hover:-translate-y-px active:scale-[0.98]",
                 isSelected
-                  ? "bg-indigo-600 text-slate-50"
+                  ? "bg-indigo-600 text-slate-50 shadow-sm"
                   : "bg-slate-50 text-slate-600 hover:text-indigo-600",
               ].join(" ")}
             >
@@ -246,18 +250,18 @@ export function PresentationMode({
             title="User request"
             subtitle={flowRequestLabel(toolCall, scenarioLabel)}
           />
-          <div className="flex items-center text-slate-400">{">"}</div>
+          <div className="flex items-center text-slate-300">→</div>
           <FlowStep index="02" title="AI extracts" subtitle="candidate action" />
-          <div className="flex items-center text-slate-400">{">"}</div>
+          <div className="flex items-center text-slate-300">→</div>
           <FlowStep index="03" title="PolicyGate" subtitle="deterministic" />
-          <div className="flex items-center text-slate-400">{">"}</div>
+          <div className="flex items-center text-slate-300">→</div>
           <FlowStep
             index="04"
             title="Decision"
             subtitle={spotlightDecisionTitle[decision.decision]}
             activeDecision={decision.decision}
           />
-          <div className="flex items-center text-slate-400">{">"}</div>
+          <div className="flex items-center text-slate-300">→</div>
           <FlowStep index="05" title="Audit proof" subtitle="SOP linked" />
         </div>
       </div>
@@ -269,7 +273,7 @@ export function PresentationMode({
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <span
             className={[
-              "inline-flex rounded-2xl border-2 bg-white px-5 py-3 text-5xl font-semibold leading-none tracking-tight",
+              "inline-flex rounded-xl px-5 py-4 text-5xl font-semibold leading-none tracking-tight",
               decisionBadgeStyles[decision.decision],
             ].join(" ")}
           >
@@ -293,7 +297,7 @@ export function PresentationMode({
               <button
                 type="button"
                 onClick={() => onSourceLineClick(primarySourceLine)}
-                className="mt-2 text-left text-sm font-semibold text-indigo-600 transition hover:text-slate-900"
+                className="mt-2 text-left text-sm font-semibold text-indigo-600 transition hover:-translate-y-px hover:text-slate-900 active:scale-[0.98]"
               >
                 {sourceLineLabel}
               </button>

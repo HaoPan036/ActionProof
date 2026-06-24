@@ -202,10 +202,10 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-gradient-to-b from-white to-slate-50 text-slate-900">
       <section className="py-12">
         <div className="mx-auto max-w-5xl px-6">
-          <header className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <header className="rounded-2xl border border-slate-200 border-t-4 border-t-indigo-500 bg-white p-6 shadow-sm">
             <p className="text-xs uppercase tracking-wide text-slate-400">
               Runtime Permission Gateway
             </p>
@@ -223,7 +223,10 @@ export default function Home() {
 
             <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
               {valueCards.map((card) => (
-                <div key={card.title} className="rounded-2xl bg-slate-50 p-6">
+                <div
+                  key={card.title}
+                  className="rounded-2xl border-l-4 border-indigo-400 bg-slate-50 p-6"
+                >
                   <div className="text-xl font-semibold text-slate-900">
                     {card.title}
                   </div>
@@ -263,7 +266,7 @@ export default function Home() {
         <div className="mx-auto max-w-5xl px-6">
           <div className="flex items-center gap-6">
             <div className="h-px flex-1 bg-slate-200" />
-            <h2 className="text-xl font-semibold text-slate-900">
+            <h2 className="text-sm font-medium uppercase tracking-widest text-slate-400">
               Technical Details
             </h2>
             <div className="h-px flex-1 bg-slate-200" />

@@ -57,7 +57,7 @@ export function ApprovalPanel({
             type="button"
             onClick={onApprove}
             disabled={approvalStatus === "APPROVED"}
-            className="rounded-2xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-slate-50 transition disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-slate-50 transition hover:-translate-y-px active:scale-[0.98] disabled:cursor-not-allowed disabled:transform-none disabled:opacity-50"
           >
             Approve
           </button>
@@ -65,7 +65,7 @@ export function ApprovalPanel({
             type="button"
             onClick={onReject}
             disabled={approvalStatus === "REJECTED"}
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:-translate-y-px hover:text-indigo-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:transform-none disabled:opacity-50"
           >
             Reject
           </button>
